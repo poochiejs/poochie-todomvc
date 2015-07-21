@@ -3,16 +3,12 @@
 var dom = require('poochie/dom');
 var observable = require('poochie/observable');
 
-function h1(text) {
-  return dom.element({name: 'h1', contents: [text]});
-}
-
-function paragraph(contents) {
-  return dom.element({name: 'p', contents: contents});
-}
-
-function listItem(contents) {
-  return dom.element({name: 'li', contents: contents});
+function container(contents, name, className) {
+  var params = {name: name || 'div', contents: contents};
+  if (className) {
+    params.attributes = {'class': className};
+  }
+  return dom.element(params);
 }
 
 function link(href, text) {
@@ -47,31 +43,6 @@ function toggleCheckbox(text) {
   });
 }
 
-
-function clearButton(text) {
-  return dom.element({
-    name: 'button',
-    attributes: {'class': 'clear-completed'},
-    contents: [text]
-  });
-}
-
-function infoFooter(contents) {
-  return dom.element({
-    name: 'footer',
-    attributes: {'class': 'info'},
-    contents: contents
-  });
-}
-
-function mainSection(contents) {
-  return dom.element({
-    name: 'section',
-    attributes: {'class': 'main'},
-    contents: contents
-  });
-}
-
 function todoItemsLeft(numItems) {
   return dom.element({
     name: 'span',
@@ -91,38 +62,6 @@ function newTodoItem(placeholderText) {
       placeholder: placeholderText,
       autofocus: true
     }
-  });
-}
-
-function todoHeader(contents) {
-  return dom.element({
-    name: 'header',
-    attributes: {'class': 'header'},
-    contents: contents
-  });
-}
-
-function todoFooter(contents) {
-  return dom.element({
-    name: 'footer',
-    attributes: {'class': 'footer'},
-    contents: contents
-  });
-}
-
-function todoSection(contents) {
-  return dom.element({
-    name: 'section',
-    attributes: {'class': 'todoapp'},
-    contents: contents
-  });
-}
-
-function todoFilters(contents) {
-  return dom.element({
-    name: 'ul',
-    attributes: {'class': 'filters'},
-    contents: contents.map(listItem)
   });
 }
 
@@ -157,34 +96,26 @@ function todoItem(attrs) {
   });
 }
 
-function todoList(contents) {
-  return dom.element({
-    name: 'ul',
-    attributes: {'class': 'todo-list'},
-    contents: contents
-  });
-}
-
-function todoApp(contents) {
-  return dom.element({name: 'div', contents: contents});
+function listItem(xs) {
+  return container(xs, 'li');
 }
 
 module.exports = {
-  clearButton: clearButton,
-  h1: h1,
-  infoFooter: infoFooter,
+  clearButton: function(s) { return container([s], 'button', 'clear-completed'); },
+  container: container,
+  h1: function(s) { return container([s], 'h1'); },
+  infoFooter: function(xs) { return container(xs, 'footer', 'info'); },
   link: link,
   listItem: listItem,
-  mainSection: mainSection,
+  mainSection: function(xs) { return container(xs, 'section', 'main'); },
   newTodoItem: newTodoItem,
-  paragraph: paragraph,
-  todoApp: todoApp,
-  todoFilters: todoFilters,
-  todoFooter: todoFooter,
-  todoHeader: todoHeader,
+  paragraph: function(xs) { return container(xs, 'p'); },
+  todoFilters: function(xs) { return container(xs.map(listItem), 'ul', 'filters'); },
+  todoFooter: function(xs) { return container(xs, 'footer', 'footer'); },
+  todoHeader: function(xs) { return container(xs, 'header', 'header'); },
   todoItem: todoItem,
   todoItemsLeft: todoItemsLeft,
-  todoList: todoList,
-  todoSection: todoSection,
+  todoList: function(xs) { return container(xs, 'ul', 'todo-list'); },
+  todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
   toggleCheckbox: toggleCheckbox
 };

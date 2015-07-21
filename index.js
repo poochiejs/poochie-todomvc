@@ -7,7 +7,7 @@ var todoData = [
   {text: 'Buy a unicorn'}
 ];
 
-module.exports = view.todoApp([
+module.exports = view.container([
   view.todoSection([
     view.todoHeader([
       view.h1('todos'),
