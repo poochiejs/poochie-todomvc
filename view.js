@@ -1,6 +1,7 @@
 'use strict';
 
 var dom = require('poochie/dom');
+var observable = require('poochie/observable');
 
 function h1(text) {
   return dom.element({name: 'h1', contents: [text]});
@@ -14,11 +15,16 @@ function listItem(contents) {
   return dom.element({name: 'li', contents: contents});
 }
 
-function link(attrs) {
+function link(href, text) {
+  var oClass = observable.publisher(undefined);
   return dom.element({
     name: 'a',
-    attributes: {'class': attrs.class, href: attrs.href},
-    contents: [attrs.text]
+    attributes: {'class': oClass, href: href},
+    contents: [text],
+    handlers: {
+      select: function() { oClass.set('selected'); },
+      blur: function() { oClass.set(undefined); }
+    }
   });
 }
 

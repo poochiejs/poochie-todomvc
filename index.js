@@ -20,9 +20,9 @@ module.exports = view.todoApp([
     view.todoFooter([
       view.todoItemsLeft(0),
       view.todoFilters([
-        view.link({'class': 'selected', href: '#/', text: 'All'}),
-        view.link({href: '#/active', text: 'Active'}),
-        view.link({href: '#/completed', text: 'Completed'})
+        view.link('#/', 'All'),
+        view.link('#/active', 'Active'),
+        view.link('#/completed', 'Completed')
       ]),
       view.clearButton('Clear completed')
     ])
@@ -31,11 +31,11 @@ module.exports = view.todoApp([
     view.paragraph(['Double-click to edit a todo']),
     view.paragraph([
       'Created by ',
-      view.link({href: 'https://github.com/garious', text: 'Greg Fitzgerald'})
+      view.link('https://github.com/garious', 'Greg Fitzgerald')
     ]),
     view.paragraph([
       'May one day be a part of ',
-      view.link({href: 'http://todomvc.com', text: 'TodoMVC'})
+      view.link('http://todomvc.com', 'TodoMVC')
     ])
   ])
 ]);
