@@ -1,6 +1,6 @@
 all: js/app.js
 
-files = index.js
+files = $(filter-out %test.js,$(wildcard *.js))
 
 node_modules/.exists:
 	npm install
