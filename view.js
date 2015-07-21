@@ -65,33 +65,81 @@ function newTodoItem(placeholderText) {
   });
 }
 
-function todoItem(attrs) {
+function checkedAttr(val) {
+  return val ? true : undefined;
+}
+
+function displayStyle(val) {
+  return val ? 'block' : 'none';
+}
+
+function readModeTodoItem(attrs) {
   return dom.element({
-    name: 'li',
-    attributes: attrs.completed ? {'class': 'completed'} : {},
+    name: 'div',
+    attributes: {'class': 'view'},
+    style: {'display': attrs.readMode.map(displayStyle)},
+    handlers: {
+      'dblclick': function onDblClick() { attrs.readMode.set(false); }
+    },
     contents: [
       dom.element({
-        name: 'div',
-        attributes: {'class': 'view'},
-        contents: [
-          dom.element({
-            name: 'input',
-            attributes: {'class': 'toggle', type: 'checkbox', checked: attrs.completed}
-          }),
-          dom.element({
-            name: 'label',
-            contents: [attrs.text]
-          }),
-          dom.element({
-            name: 'button',
-            attributes: {'class': 'destroy'}
-          })
-        ]
+        name: 'input',
+        attributes: {
+          'class': 'toggle',
+          type: 'checkbox',
+          checked: attrs.completed.map(checkedAttr)
+        },
+        handlers: {
+          'click': function() { attrs.completed.set(!attrs.completed.get()); }
+        }
       }),
       dom.element({
-        name: 'input',
-        attributes: {'class': 'edit', value: 'Create a TodoMVC template'}
+        name: 'label',
+        contents: attrs.text.map(function(x) { return [x]; })
+      }),
+      dom.element({
+        name: 'button',
+        attributes: {'class': 'destroy'}
       })
+    ]
+  });
+}
+
+function not(val) {
+  return !val;
+}
+
+function writeModeTodoItem(attrs) {
+  return dom.element({
+    name: 'input',
+    attributes: {'class': 'edit', value: attrs.text},
+    style: {'display': attrs.readMode.map(not).map(displayStyle)},
+    handlers: {
+      'change': function onChange(evt) {
+        attrs.text.set(evt.target.value);
+        attrs.readMode.set(true);
+      }
+    }
+  });
+}
+
+function completedClass(val) {
+  return val ? 'completed' : '';
+}
+
+function todoItem(attrs) {
+  var itemAttrs = {
+    text: attrs.text,
+    completed: attrs.completed,
+    readMode: observable.publisher(true)
+  };
+
+  return dom.element({
+    name: 'li',
+    attributes: {'class': attrs.completed.map(completedClass)},
+    contents: [
+      readModeTodoItem(itemAttrs),
+      writeModeTodoItem(itemAttrs)
     ]
   });
 }
@@ -117,5 +165,7 @@ module.exports = {
   todoItemsLeft: todoItemsLeft,
   todoList: function(xs) { return container(xs, 'ul', 'todo-list'); },
   todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
-  toggleCheckbox: toggleCheckbox
+  toggleCheckbox: toggleCheckbox,
+  readModeTodoItem: readModeTodoItem,
+  writeModeTodoItem: writeModeTodoItem
 };

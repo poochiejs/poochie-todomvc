@@ -1,11 +1,20 @@
 'use strict';
 
 var view = require('./view');
+var observable = require('poochie/observable');
 
-var todoData = [
+function observeTodoItemData(data) {
+  return {
+    text: observable.publisher(data.text),
+    completed: observable.publisher(Boolean(data.completed))
+  };
+}
+
+var rawTodoData = [
   {text: 'Taste JavaScript', completed: true},
   {text: 'Buy a unicorn'}
 ];
+var todoData = rawTodoData.map(observeTodoItemData);
 
 module.exports = view.container([
   view.todoSection([
