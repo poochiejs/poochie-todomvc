@@ -5,7 +5,26 @@
     "todomvc-app-css": "^2.0.0",
     "todomvc-common": "^1.0.0"
   },
+  "scripts": {
+    "test": "eslint *.js && istanbul cover -x '*test.js' test.js"
+  },
   "devDependencies": {
-    "browserify": "^11.0.0"
+    "browserify": "^11.0.0",
+    "codeclimate-test-reporter": "^0.1.0",
+    "eslint": "^0.24.1",
+    "istanbul": "^0.3.17",
+    "test": "^0.0.5"
+  },
+  "eslintConfig": {
+    "rules": {
+      "indent": [2, 2],
+      "quotes": [
+        2,
+        "single"
+      ]
+    },
+    "env": {
+      "node": true
+    }
   }
 }
