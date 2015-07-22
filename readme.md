@@ -1,18 +1,11 @@
-# Poochie • [TodoMVC](http://todomvc.com)
+# [Poochie](https://github.com/garious/poochie) • [TodoMVC](http://todomvc.com)
 
 [![Build Status](https://travis-ci.org/garious/poochie-todomvc.svg)](https://travis-ci.org/garious/poochie-todomvc)
 [![Test Coverage](https://codeclimate.com/github/garious/poochie-todomvc/badges/coverage.svg)](https://codeclimate.com/github/garious/poochie-todomvc/coverage)
 
 > Poochie is one outrageous microframework
 
-## Resources
+Work in progress. See the latest build on github.io:
 
-- [Poochie](https://github.com/garious/poochie)
+[Poochie TodoMVC Demo](https://garious.github.io/poochie-todomvc)
 
-### Support
-
-- [Poochie Issues](https://github.com/garious/poochie/issues)
-
-## Credit
-
-Created by [Greg Fitzgerald](https://github.com/garious)
