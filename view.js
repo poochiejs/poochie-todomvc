@@ -43,15 +43,20 @@ function toggleCheckbox(text) {
   });
 }
 
-function todoItemsLeft(numItems) {
-  return dom.element({
-    name: 'span',
-    attributes: {'class': 'todo-count'},
-    contents: [
-       dom.element({name: 'strong', contents: [String(numItems)]}),
-       ' items left'
-    ]
-  });
+function isIncomplete(itemData) {
+  return !itemData.completed.get();
+}
+
+function todoItemsLeftContents(items) {
+  var itemsLeft = items.filter(isIncomplete).length;
+  return [
+     dom.element({name: 'strong', contents: [String(itemsLeft)]}),
+     ' item' + (itemsLeft === 1 ? '' : 's') + ' left'
+  ];
+}
+
+function todoItemsLeft(todoData) {
+  return container(todoItemsLeftContents(todoData), 'span', 'todo-count');
 }
 
 function newTodoItem(placeholderText) {
@@ -144,6 +149,10 @@ function todoItem(attrs) {
   });
 }
 
+function todoList(todoData) {
+  return container(todoData.map(todoItem), 'ul', 'todo-list');
+}
+
 function listItem(xs) {
   return container(xs, 'li');
 }
@@ -163,7 +172,8 @@ module.exports = {
   todoHeader: function(xs) { return container(xs, 'header', 'header'); },
   todoItem: todoItem,
   todoItemsLeft: todoItemsLeft,
-  todoList: function(xs) { return container(xs, 'ul', 'todo-list'); },
+  todoItemsLeftContents: todoItemsLeftContents,
+  todoList: todoList,
   todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
   toggleCheckbox: toggleCheckbox,
   readModeTodoItem: readModeTodoItem,

@@ -1,12 +1,14 @@
 all: js/app.js
 
 files = $(filter-out %test.js,$(wildcard *.js))
+testFiles = $(wildcard *test.js)
 
 node_modules/.exists:
 	npm install
 	@touch $@
 
-js/app.js: $(files) node_modules/.exists
+js/app.js: $(files) $(testFiles) node_modules/.exists
+	npm test
 	@mkdir -p $(@D)
 	browserify $(addprefix -r ./,$(files)) -r poochie/dom -o $@ || rm -f $@
 

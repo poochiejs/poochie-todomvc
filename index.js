@@ -24,10 +24,10 @@ module.exports = view.container([
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete'),
-      view.todoList(todoData.map(view.todoItem))
+      view.todoList(todoData)
     ]),
     view.todoFooter([
-      view.todoItemsLeft(0),
+      view.todoItemsLeft(todoData),
       view.todoFilters([
         view.link('#/', 'All'),
         view.link('#/active', 'Active'),

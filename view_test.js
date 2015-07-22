@@ -74,5 +74,18 @@ var pub = observable.publisher;
   assert.equal(todo2.attributes.class.get(), 'completed');
 })();
 
+// Test todoItemsLeftContents.
+(function(){
+  function itemsLeft(items) {
+    var cnts = view.todoItemsLeftContents(items);
+    return cnts[0].contents[0] + cnts[1];
+  }
+
+  assert.equal(itemsLeft([]), '0 items left');
+  assert.equal(itemsLeft([{completed: pub(true)}]), '0 items left');
+  assert.equal(itemsLeft([{completed: pub(false)}]), '1 item left');
+  assert.equal(itemsLeft([{completed: pub(false)}, {completed: pub(false)}]), '2 items left');
+})();
+
 module.exports = 'passed!';
 
