@@ -13,3 +13,11 @@ js/app.js: $(files) node_modules/.exists
 clean:
 	rm -f js/app.js
 	rm -rf node_modules
+
+publish: js/app.js
+	git show-branch gh-pages && git checkout gh-pages || git checkout --orphan gh-pages && git rm -rf .
+	git add $<
+	git diff --cached --exit-code || git commit -m "Updated JavaScript" && git push origin gh-pages
+	git checkout master
+	@echo
+	@echo "Published https://garious.github.io/poochie-todomvc"
