@@ -1,24 +1,43 @@
-all: js/app.js
+o = out
+nodeBin = node_modules/.bin
+
+shipFiles = \
+    app.js \
+    index.html \
+    todomvc-common/base.css \
+    todomvc-app-css/index.css
 
 files = $(filter-out %test.js,$(wildcard *.js))
 testFiles = $(wildcard *test.js)
+
+all: $(addprefix $o/,$(shipFiles))
 
 node_modules/.exists:
 	npm install
 	@touch $@
 
-js/app.js: $(files) $(testFiles) node_modules/.exists
+$o/app.js: $(files) $(testFiles) node_modules/.exists
+	@mkdir -p $(@D)
 	npm test
 	@mkdir -p $(@D)
-	browserify $(addprefix -r ./,$(files)) -r poochie/dom -o $@ || rm -f $@
+	$(nodeBin)/browserify $(addprefix -r ./,$(files)) -r poochie/dom -o $@ || rm -f $@
+
+$o/index.html: index.html
+	@mkdir -p $(@D)
+	cp $< $@
+
+$o/%: node_modules/%
+	@mkdir -p $(@D)
+	cp $< $@
 
 clean:
-	rm -f js/app.js
+	rm -rf $o
 	rm -rf node_modules
 
-publish: js/app.js
+publish: all
 	git show-branch gh-pages && git checkout gh-pages || git checkout --orphan gh-pages && git rm -rf .
-	git add $<
+	mv $o/* .
+	git add .
 	git diff --cached --exit-code || git commit -m "Updated JavaScript" && git push origin gh-pages
 	git checkout master
 	@echo
