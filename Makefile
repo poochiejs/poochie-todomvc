@@ -12,7 +12,7 @@ testFiles = $(wildcard *test.js)
 
 all: $(addprefix $o/,$(shipFiles))
 
-node_modules/.exists:
+node_modules/.exists: package.json
 	npm install
 	@touch $@
 
