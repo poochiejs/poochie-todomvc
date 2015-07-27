@@ -37,7 +37,7 @@ clean:
 publish: all
 	git show-branch gh-pages && git checkout gh-pages || git checkout --orphan gh-pages && git rm -rf .
 	mv $o/* .
-	git add .
+	git add $(shipFiles)
 	git diff --cached --exit-code || git commit -m "Updated JavaScript" && git push origin gh-pages
 	git checkout master
 	@echo
