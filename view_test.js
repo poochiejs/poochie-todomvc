@@ -4,17 +4,18 @@ var view = require('./view');
 var assert = require('assert');
 var observable = require('poochie/observable');
 var pub = observable.publisher;
+var eq = assert.deepEqual;
 
 // Test link event handlers.
 (function(){
   var link = view.link('a.b.c', 'A');
-  assert.equal(link.attributes.class.get(), undefined);
+  eq(link.attributes.class.get(), undefined);
 
   link.handlers.select();
-  assert.equal(link.attributes.class.get(), 'selected');
+  eq(link.attributes.class.get(), 'selected');
 
   link.handlers.blur();
-  assert.equal(link.attributes.class.get(), undefined);
+  eq(link.attributes.class.get(), undefined);
 })();
 
 // Test double-clicking todo items.
@@ -27,21 +28,21 @@ var pub = observable.publisher;
   var writeModeTodo = todo.contents[1];
 
   // Ensure label contents is a list, not a string.
-  assert.deepEqual(readModeTodo.contents[1].contents.get(), ['foo']);
+  eq(readModeTodo.contents[1].contents.get(), ['foo']);
 
   // Test intial state.
-  assert.equal(readModeTodo.style.display.get(), 'block');
-  assert.equal(writeModeTodo.style.display.get(), 'none');
+  eq(readModeTodo.style.display.get(), 'block');
+  eq(writeModeTodo.style.display.get(), 'none');
 
   // Test state after double-clicking.
   readModeTodo.handlers.dblclick();
-  assert.equal(readModeTodo.style.display.get(), 'none');
-  assert.equal(writeModeTodo.style.display.get(), 'block');
+  eq(readModeTodo.style.display.get(), 'none');
+  eq(writeModeTodo.style.display.get(), 'block');
 
   // Test state after changing the text.
   writeModeTodo.handlers.change({target: {value: 'bar'}});
-  assert.equal(readModeTodo.style.display.get(), 'block');
-  assert.equal(writeModeTodo.style.display.get(), 'none');
+  eq(readModeTodo.style.display.get(), 'block');
+  eq(writeModeTodo.style.display.get(), 'none');
 })();
 
 // Test marking item as complete.
@@ -54,24 +55,24 @@ var pub = observable.publisher;
 
   // Test initial state.
   var checkbox = readModeTodo.contents[0];
-  assert.equal(checkbox.attributes.checked.get(), undefined);
+  eq(checkbox.attributes.checked.get(), undefined);
 
   // Test state after clicking.
   checkbox.handlers.click();
-  assert.equal(checkbox.attributes.checked.get(), true);
+  eq(checkbox.attributes.checked.get(), true);
 
   // Test state after clicking again.
   checkbox.handlers.click();
-  assert.equal(checkbox.attributes.checked.get(), undefined);
+  eq(checkbox.attributes.checked.get(), undefined);
 })();
 
 // Test todoItem class attribute.
 (function(){
   var todo = view.todoItem({text: pub('a'), completed: pub(false)});
-  assert.equal(todo.attributes.class.get(), '');
+  eq(todo.attributes.class.get(), '');
 
   var todo2 = view.todoItem({text: pub('a'), completed: pub(true)});
-  assert.equal(todo2.attributes.class.get(), 'completed');
+  eq(todo2.attributes.class.get(), 'completed');
 })();
 
 // Test todoItemsLeftContents.
@@ -81,10 +82,10 @@ var pub = observable.publisher;
     return cnts[0].contents[0] + cnts[1];
   }
 
-  assert.equal(itemsLeft([]), '0 items left');
-  assert.equal(itemsLeft([{completed: pub(true)}]), '0 items left');
-  assert.equal(itemsLeft([{completed: pub(false)}]), '1 item left');
-  assert.equal(itemsLeft([{completed: pub(false)}, {completed: pub(false)}]), '2 items left');
+  eq(itemsLeft([]), '0 items left');
+  eq(itemsLeft([{completed: pub(true)}]), '0 items left');
+  eq(itemsLeft([{completed: pub(false)}]), '1 item left');
+  eq(itemsLeft([{completed: pub(false)}, {completed: pub(false)}]), '2 items left');
 })();
 
 module.exports = 'passed!';
