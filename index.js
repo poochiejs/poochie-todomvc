@@ -1,21 +1,7 @@
 'use strict';
 
+var model = require('./model');
 var view = require('./view');
-var observable = require('poochie/observable');
-
-function observeTodoItemData(data) {
-  return {
-    text: observable.publisher(data.text),
-    completed: observable.publisher(Boolean(data.completed))
-  };
-}
-
-var rawTodoData = [
-  {text: 'Taste JavaScript', completed: true},
-  {text: 'Buy a unicorn'}
-];
-var todoData = rawTodoData.map(observeTodoItemData);
-var oTodoData = observable.publisher(todoData);
 
 module.exports = view.container([
   view.todoSection([
@@ -25,10 +11,10 @@ module.exports = view.container([
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete'),
-      view.todoList(oTodoData)
+      view.todoList(model.oTodoData)
     ]),
     view.todoFooter([
-      view.todoItemsLeft(oTodoData),
+      view.todoItemsLeft(model.oTodoData),
       view.todoFilters([
         view.link('#/', 'All'),
         view.link('#/active', 'Active'),
