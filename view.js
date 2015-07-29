@@ -2,6 +2,7 @@
 
 var dom = require('poochie/dom');
 var observable = require('poochie/observable');
+var model = require('./model');
 
 function container(contents, name, className) {
   var params = {name: name || 'div', contents: contents};
@@ -79,10 +80,10 @@ function todoItemsLeft(oTodoData) {
   return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
 }
 
-function newTodoItem(placeholderText, onEnter) {
+function newTodoItem(placeholderText, oTodoData) {
   function onKeyUp(evt) {
     if (evt.keyCode === 13) {
-      onEnter(evt.target.value);
+      model.addItem(evt.target.value, oTodoData);
       evt.target.value = '';
     }
   }

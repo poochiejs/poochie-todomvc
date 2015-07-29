@@ -1,17 +1,19 @@
 'use strict';
 
 var model = require('./model');
+var observable = require('poochie/observable');
 var assert = require('assert');
+var pub = observable.publisher;
 var eq = assert.deepEqual;
 
 (function testTodoData(){
-  eq(model.oTodoData.get() instanceof Array, true);
+  eq(model.createObservableTodoData().get() instanceof Array, true);
 })();
 
 (function testAddItem(){
-  var initialLength = model.oTodoData.get().length;
-  model.addItem('do stuff');
-  eq(model.oTodoData.get().length, initialLength + 1);
+  var oTodoData = pub([]);
+  model.addItem('do stuff', oTodoData);
+  eq(oTodoData.get().length, 1);
 })();
 
 module.exports = 'passed!';

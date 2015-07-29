@@ -3,18 +3,20 @@
 var model = require('./model');
 var view = require('./view');
 
+var oTodoData = model.createObservableTodoData();
+
 module.exports = view.container([
   view.todoSection([
     view.todoHeader([
       view.h1('todos'),
-      view.newTodoItem('What needs to be done?', model.addItem)
+      view.newTodoItem('What needs to be done?', oTodoData)
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete'),
-      view.todoList(model.oTodoData)
+      view.todoList(oTodoData)
     ]),
     view.todoFooter([
-      view.todoItemsLeft(model.oTodoData),
+      view.todoItemsLeft(oTodoData),
       view.todoFilters([
         view.link('#/', 'All'),
         view.link('#/active', 'Active'),

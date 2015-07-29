@@ -114,16 +114,16 @@ var eq = assert.deepEqual;
 
 // Test newTodoItem.
 (function(){
-  var itemText = 'foo';
-  var item = view.newTodoItem('baz', function(text) { itemText = text; });
+  var oTodoData = pub([]);
+  var item = view.newTodoItem('baz', oTodoData);
 
   // Verify the handler is not called.
   item.handlers.keyup({keyCode: 10, target: {value: 'bar'}});
-  eq(itemText, 'foo');
+  eq(oTodoData.get().length, 0);
 
   // Verify the handler is called.
   item.handlers.keyup({keyCode: 13, target: {value: 'bar'}});
-  eq(itemText, 'bar');
+  eq(oTodoData.get().length, 1);
 })();
 
 module.exports = 'passed!';

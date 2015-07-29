@@ -14,9 +14,11 @@ var rawTodoData = [
   {text: 'Buy a unicorn'}
 ];
 
-var oTodoData = observable.publisher(rawTodoData.map(observeTodoItemData));
+function createObservableTodoData() {
+  return observable.publisher(rawTodoData.map(observeTodoItemData));
+}
 
-function addItem(text) {
+function addItem(text, oTodoData) {
   var data = oTodoData.get();
   data.push(observeTodoItemData({text: text}));
   oTodoData.set(data);
@@ -24,5 +26,5 @@ function addItem(text) {
 
 module.exports = {
   addItem: addItem,
-  oTodoData: oTodoData
+  createObservableTodoData: createObservableTodoData
 };
