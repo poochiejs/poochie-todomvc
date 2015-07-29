@@ -199,34 +199,21 @@ module.exports = {
 },{}],"/index.js":[function(require,module,exports){
 'use strict';
 
+var model = require('./model');
 var view = require('./view');
-var observable = require('poochie/observable');
-
-function observeTodoItemData(data) {
-  return {
-    text: observable.publisher(data.text),
-    completed: observable.publisher(Boolean(data.completed))
-  };
-}
-
-var rawTodoData = [
-  {text: 'Taste JavaScript', completed: true},
-  {text: 'Buy a unicorn'}
-];
-var todoData = rawTodoData.map(observeTodoItemData);
 
 module.exports = view.container([
   view.todoSection([
     view.todoHeader([
       view.h1('todos'),
-      view.newTodoItem('What needs to be done?')
+      view.newTodoItem('What needs to be done?', model.addItem)
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete'),
-      view.todoList(todoData)
+      view.todoList(model.oTodoData)
     ]),
     view.todoFooter([
-      view.todoItemsLeft(todoData),
+      view.todoItemsLeft(model.oTodoData),
       view.todoFilters([
         view.link('#/', 'All'),
         view.link('#/active', 'Active'),
@@ -248,7 +235,37 @@ module.exports = view.container([
   ])
 ]);
 
-},{"./view":"/view.js","poochie/observable":3}],"/view.js":[function(require,module,exports){
+},{"./model":"/model.js","./view":"/view.js"}],"/model.js":[function(require,module,exports){
+'use strict';
+
+var observable = require('poochie/observable');
+
+function observeTodoItemData(data) {
+  return {
+    text: observable.publisher(data.text),
+    completed: observable.publisher(Boolean(data.completed))
+  };
+}
+
+var rawTodoData = [
+  {text: 'Taste JavaScript', completed: true},
+  {text: 'Buy a unicorn'}
+];
+
+var oTodoData = observable.publisher(rawTodoData.map(observeTodoItemData));
+
+function addItem(text) {
+  var data = oTodoData.get();
+  data.push(observeTodoItemData({text: text}));
+  oTodoData.set(data);
+}
+
+module.exports = {
+  addItem: addItem,
+  oTodoData: oTodoData
+};
+
+},{"poochie/observable":3}],"/view.js":[function(require,module,exports){
 'use strict';
 
 var dom = require('poochie/dom');
@@ -294,29 +311,58 @@ function toggleCheckbox(text) {
   });
 }
 
-function isIncomplete(itemData) {
-  return !itemData.completed.get();
+function isObservableFalse(o) {
+  return !o.get();
 }
 
 function todoItemsLeftContents(items) {
-  var itemsLeft = items.filter(isIncomplete).length;
+  var itemsLeft = items.filter(isObservableFalse).length;
   return [
      dom.element({name: 'strong', contents: [String(itemsLeft)]}),
      ' item' + (itemsLeft === 1 ? '' : 's') + ' left'
   ];
 }
 
-function todoItemsLeft(todoData) {
-  return container(todoItemsLeftContents(todoData), 'span', 'todo-count');
+function completedField(item) {
+  return item.completed;
 }
 
-function newTodoItem(placeholderText) {
+function completedFields(data) {
+  return data.map(completedField);
+}
+
+function oTodoItemsLeftContents(oItems) {
+  // An observable of observables.
+  var oCompletedFields = oItems.map(completedFields);
+
+  // Notified if any of item changes state, or if the total number of items
+  // changes.
+  var oCompletedTodoData = observable.subscriber(oCompletedFields, function() {
+    return oCompletedFields.get();
+  });
+  return oCompletedTodoData.map(todoItemsLeftContents);
+}
+
+function todoItemsLeft(oTodoData) {
+  return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
+}
+
+function newTodoItem(placeholderText, onEnter) {
+  function onKeyUp(evt) {
+    if (evt.keyCode === 13) {
+      onEnter(evt.target.value);
+      evt.target.value = '';
+    }
+  }
   return dom.element({
     name: 'input',
     attributes: {
       'class': 'new-todo',
       placeholder: placeholderText,
       autofocus: true
+    },
+    handlers: {
+      keyup: onKeyUp
     }
   });
 }
@@ -400,8 +446,13 @@ function todoItem(attrs) {
   });
 }
 
-function todoList(todoData) {
-  return container(todoData.map(todoItem), 'ul', 'todo-list');
+function todoItems(todoData) {
+  return todoData.map(todoItem);
+}
+
+function todoList(oTodoData) {
+  var oItems = oTodoData.map(todoItems);
+  return container(oItems, 'ul', 'todo-list');
 }
 
 function listItem(xs) {
