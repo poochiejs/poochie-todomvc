@@ -16,6 +16,13 @@ var rawTodoData = [
 
 var oTodoData = observable.publisher(rawTodoData.map(observeTodoItemData));
 
+function addItem(text) {
+  var data = oTodoData.get();
+  data.push(observeTodoItemData({text: text}));
+  oTodoData.set(data);
+}
+
 module.exports = {
+  addItem: addItem,
   oTodoData: oTodoData
 };

@@ -79,13 +79,22 @@ function todoItemsLeft(oTodoData) {
   return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
 }
 
-function newTodoItem(placeholderText) {
+function newTodoItem(placeholderText, onEnter) {
+  function onKeyUp(evt) {
+    if (evt.keyCode === 13) {
+      onEnter(evt.target.value);
+      evt.target.value = '';
+    }
+  }
   return dom.element({
     name: 'input',
     attributes: {
       'class': 'new-todo',
       placeholder: placeholderText,
       autofocus: true
+    },
+    handlers: {
+      keyup: onKeyUp
     }
   });
 }

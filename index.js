@@ -7,7 +7,7 @@ module.exports = view.container([
   view.todoSection([
     view.todoHeader([
       view.h1('todos'),
-      view.newTodoItem('What needs to be done?')
+      view.newTodoItem('What needs to be done?', model.addItem)
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete'),
