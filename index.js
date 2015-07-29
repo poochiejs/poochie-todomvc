@@ -25,7 +25,7 @@ module.exports = view.container([
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete'),
-      view.todoList(todoData)
+      view.todoList(oTodoData)
     ]),
     view.todoFooter([
       view.todoItemsLeft(oTodoData),

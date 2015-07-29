@@ -75,6 +75,15 @@ var eq = assert.deepEqual;
   eq(todo2.attributes.class.get(), 'completed');
 })();
 
+// Test todoList.
+(function(){
+  var oTodoData = pub([]);
+  var todoList = view.todoList(oTodoData);
+  oTodoData.set([{text: pub('a'), completed: pub(false)}]);
+  var todo = todoList.contents.get()[0];
+  eq(todo.attributes.class.get(), '');
+})();
+
 // Test todoItemsLeftContents.
 (function(){
   function itemsLeft(items) {

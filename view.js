@@ -169,8 +169,13 @@ function todoItem(attrs) {
   });
 }
 
-function todoList(todoData) {
-  return container(todoData.map(todoItem), 'ul', 'todo-list');
+function todoItems(todoData) {
+  return todoData.map(todoItem);
+}
+
+function todoList(oTodoData) {
+  var oItems = oTodoData.map(todoItems);
+  return container(oItems, 'ul', 'todo-list');
 }
 
 function listItem(xs) {
