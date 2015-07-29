@@ -5,6 +5,7 @@ shipFiles = \
     app.js \
     index.html \
     todomvc-common/base.css \
+    todomvc-common/base.js \
     todomvc-app-css/index.css
 
 files = $(filter-out %test.js,$(wildcard *.js))
