@@ -43,20 +43,40 @@ function toggleCheckbox(text) {
   });
 }
 
-function isIncomplete(itemData) {
-  return !itemData.completed.get();
+function isObservableFalse(o) {
+  return !o.get();
 }
 
 function todoItemsLeftContents(items) {
-  var itemsLeft = items.filter(isIncomplete).length;
+  var itemsLeft = items.filter(isObservableFalse).length;
   return [
      dom.element({name: 'strong', contents: [String(itemsLeft)]}),
      ' item' + (itemsLeft === 1 ? '' : 's') + ' left'
   ];
 }
 
-function todoItemsLeft(todoData) {
-  return container(todoItemsLeftContents(todoData), 'span', 'todo-count');
+function completedField(item) {
+  return item.completed;
+}
+
+function completedFields(data) {
+  return data.map(completedField);
+}
+
+function oTodoItemsLeftContents(oItems) {
+  // An observable of observables.
+  var oCompletedFields = oItems.map(completedFields);
+
+  // Notified if any of item changes state, or if the total number of items
+  // changes.
+  var oCompletedTodoData = observable.subscriber(oCompletedFields, function() {
+    return oCompletedFields.get();
+  });
+  return oCompletedTodoData.map(todoItemsLeftContents);
+}
+
+function todoItemsLeft(oTodoData) {
+  return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
 }
 
 function newTodoItem(placeholderText) {

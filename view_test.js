@@ -83,9 +83,24 @@ var eq = assert.deepEqual;
   }
 
   eq(itemsLeft([]), '0 items left');
-  eq(itemsLeft([{completed: pub(true)}]), '0 items left');
-  eq(itemsLeft([{completed: pub(false)}]), '1 item left');
-  eq(itemsLeft([{completed: pub(false)}, {completed: pub(false)}]), '2 items left');
+  eq(itemsLeft([pub(true)]), '0 items left');
+  eq(itemsLeft([pub(false)]), '1 item left');
+  eq(itemsLeft([pub(false), pub(false)]), '2 items left');
+})();
+
+// Test todoItemsLeft.
+(function(){
+  function itemsLeft(oItems) {
+    var span = view.todoItemsLeft(oItems);
+    var cnts = span.contents.get();
+    return cnts[0].contents[0] + cnts[1];
+  }
+  var oTodoData = pub([]);
+  eq(itemsLeft(oTodoData), '0 items left');
+
+  // Add an item to the todo list and verify the contents changes.
+  oTodoData.set([{completed: pub(false)}]);
+  eq(itemsLeft(oTodoData), '1 item left');
 })();
 
 module.exports = 'passed!';

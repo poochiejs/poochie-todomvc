@@ -15,6 +15,7 @@ var rawTodoData = [
   {text: 'Buy a unicorn'}
 ];
 var todoData = rawTodoData.map(observeTodoItemData);
+var oTodoData = observable.publisher(todoData);
 
 module.exports = view.container([
   view.todoSection([
@@ -27,7 +28,7 @@ module.exports = view.container([
       view.todoList(todoData)
     ]),
     view.todoFooter([
-      view.todoItemsLeft(todoData),
+      view.todoItemsLeft(oTodoData),
       view.todoFilters([
         view.link('#/', 'All'),
         view.link('#/active', 'Active'),
