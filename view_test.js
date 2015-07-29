@@ -112,5 +112,19 @@ var eq = assert.deepEqual;
   eq(itemsLeft(oTodoData), '1 item left');
 })();
 
+// Test newTodoItem.
+(function(){
+  var itemText = 'foo';
+  var item = view.newTodoItem('baz', function(text) { itemText = text; });
+
+  // Verify the handler is not called.
+  item.handlers.keyup({keyCode: 10, target: {value: 'bar'}});
+  eq(itemText, 'foo');
+
+  // Verify the handler is called.
+  item.handlers.keyup({keyCode: 13, target: {value: 'bar'}});
+  eq(itemText, 'bar');
+})();
+
 module.exports = 'passed!';
 
