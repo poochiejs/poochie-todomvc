@@ -202,18 +202,20 @@ module.exports = {
 var model = require('./model');
 var view = require('./view');
 
+var oTodoData = model.createObservableTodoData();
+
 module.exports = view.container([
   view.todoSection([
     view.todoHeader([
       view.h1('todos'),
-      view.newTodoItem('What needs to be done?', model.addItem)
+      view.newTodoItem('What needs to be done?', oTodoData)
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete'),
-      view.todoList(model.oTodoData)
+      view.todoList(oTodoData)
     ]),
     view.todoFooter([
-      view.todoItemsLeft(model.oTodoData),
+      view.todoItemsLeft(oTodoData),
       view.todoFilters([
         view.link('#/', 'All'),
         view.link('#/active', 'Active'),
@@ -252,17 +254,26 @@ var rawTodoData = [
   {text: 'Buy a unicorn'}
 ];
 
-var oTodoData = observable.publisher(rawTodoData.map(observeTodoItemData));
+function createObservableTodoData() {
+  return observable.publisher(rawTodoData.map(observeTodoItemData));
+}
 
-function addItem(text) {
+function addItem(text, oTodoData) {
   var data = oTodoData.get();
   data.push(observeTodoItemData({text: text}));
   oTodoData.set(data);
 }
 
+function removeItem(idx, oTodoData) {
+  var data = oTodoData.get();
+  data.splice(idx, 1);
+  oTodoData.set(data);
+}
+
 module.exports = {
   addItem: addItem,
-  oTodoData: oTodoData
+  createObservableTodoData: createObservableTodoData,
+  removeItem: removeItem
 };
 
 },{"poochie/observable":3}],"/view.js":[function(require,module,exports){
@@ -270,6 +281,7 @@ module.exports = {
 
 var dom = require('poochie/dom');
 var observable = require('poochie/observable');
+var model = require('./model');
 
 function container(contents, name, className) {
   var params = {name: name || 'div', contents: contents};
@@ -347,10 +359,10 @@ function todoItemsLeft(oTodoData) {
   return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
 }
 
-function newTodoItem(placeholderText, onEnter) {
+function newTodoItem(placeholderText, oTodoData) {
   function onKeyUp(evt) {
     if (evt.keyCode === 13) {
-      onEnter(evt.target.value);
+      model.addItem(evt.target.value, oTodoData);
       evt.target.value = '';
     }
   }
@@ -401,7 +413,10 @@ function readModeTodoItem(attrs) {
       }),
       dom.element({
         name: 'button',
-        attributes: {'class': 'destroy'}
+        attributes: {'class': 'destroy'},
+        handlers: {
+          'click': function() { model.removeItem(attrs.index, attrs.oTodoData); }
+        }
       })
     ]
   });
@@ -429,8 +444,10 @@ function completedClass(val) {
   return val ? 'completed' : '';
 }
 
-function todoItem(attrs) {
+function todoItem(oTodoData, attrs, index) {
   var itemAttrs = {
+    index: index,
+    oTodoData: oTodoData,
     text: attrs.text,
     completed: attrs.completed,
     readMode: observable.publisher(true)
@@ -446,11 +463,10 @@ function todoItem(attrs) {
   });
 }
 
-function todoItems(todoData) {
-  return todoData.map(todoItem);
-}
-
 function todoList(oTodoData) {
+  function todoItems(todoData) {
+    return todoData.map(todoItem.bind(null, oTodoData));
+  }
   var oItems = oTodoData.map(todoItems);
   return container(oItems, 'ul', 'todo-list');
 }
@@ -482,7 +498,7 @@ module.exports = {
   writeModeTodoItem: writeModeTodoItem
 };
 
-},{"poochie/dom":"poochie/dom","poochie/observable":3}],"poochie/dom":[function(require,module,exports){
+},{"./model":"/model.js","poochie/dom":"poochie/dom","poochie/observable":3}],"poochie/dom":[function(require,module,exports){
 //
 // Module name:
 //
