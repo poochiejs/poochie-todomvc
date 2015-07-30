@@ -23,7 +23,7 @@ module.exports = view.container([
         view.link('#/completed', 'Completed')
       ]),
       view.clearButton('Clear completed', oTodoData)
-    ])
+    ], oTodoData)
   ]),
   view.infoFooter([
     view.paragraph(['Double-click to edit a todo']),

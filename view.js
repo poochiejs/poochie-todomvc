@@ -152,6 +152,10 @@ function not(val) {
   return !val;
 }
 
+function len(xs) {
+  return xs.length;
+}
+
 function writeModeTodoItem(attrs) {
   return dom.element({
     name: 'input',
@@ -257,6 +261,15 @@ function clearButton(s, oTodoData) {
   });
 }
 
+function todoFooter(xs, oTodoData) {
+  return dom.element({
+    name: 'footer',
+    attributes: {'class': 'footer'},
+    style: {display: oTodoData.map(len).map(displayStyle)},
+    contents: xs
+  });
+}
+
 module.exports = {
   clearButton: clearButton,
   container: container,
@@ -268,7 +281,7 @@ module.exports = {
   newTodoItem: newTodoItem,
   paragraph: function(xs) { return container(xs, 'p'); },
   todoFilters: function(xs) { return container(xs.map(listItem), 'ul', 'filters'); },
-  todoFooter: function(xs) { return container(xs, 'footer', 'footer'); },
+  todoFooter: todoFooter,
   todoHeader: function(xs) { return container(xs, 'header', 'header'); },
   todoItem: todoItem,
   todoItemsLeft: todoItemsLeft,

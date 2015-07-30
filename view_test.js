@@ -188,5 +188,11 @@ var eq = assert.deepEqual;
   eq(button.style.visibility.get(), 'hidden');
 })();
 
+// Test footer is not visible if there are no todo items.
+(function(){
+  var footer = view.todoFooter([], pub([]));
+  eq(footer.style.display.get(), 'none');
+})();
+
 module.exports = 'passed!';
 
