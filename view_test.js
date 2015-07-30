@@ -146,5 +146,17 @@ var eq = assert.deepEqual;
   eq(oTodoData.get().length, 0);
 })();
 
+// Test removeItem by editing.
+(function(){
+  var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
+  var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
+  var writeModeTodo = todo.contents[2];
+
+  eq(oTodoData.get().length, 1);
+
+  writeModeTodo.handlers.change({target: {value: '   '}});
+  eq(oTodoData.get().length, 0);
+})();
+
 module.exports = 'passed!';
 
