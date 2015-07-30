@@ -400,17 +400,6 @@ function readModeTodoItem(attrs) {
     },
     contents: [
       dom.element({
-        name: 'input',
-        attributes: {
-          'class': 'toggle',
-          type: 'checkbox',
-          checked: attrs.completed.map(checkedAttr)
-        },
-        handlers: {
-          'click': function() { attrs.completed.set(!attrs.completed.get()); }
-        }
-      }),
-      dom.element({
         name: 'label',
         contents: attrs.text.map(function(x) { return [x]; })
       }),
@@ -458,8 +447,19 @@ function todoItem(oTodoData, attrs, index) {
 
   return dom.element({
     name: 'li',
-    attributes: {'class': attrs.completed.map(completedClass)},
+    attributes: {'class': itemAttrs.completed.map(completedClass)},
     contents: [
+      dom.element({
+        name: 'input',
+        attributes: {
+          'class': 'toggle',
+          type: 'checkbox',
+          checked: itemAttrs.completed.map(checkedAttr)
+        },
+        handlers: {
+          'click': function() { itemAttrs.completed.set(!itemAttrs.completed.get()); }
+        }
+      }),
       readModeTodoItem(itemAttrs),
       writeModeTodoItem(itemAttrs)
     ]
