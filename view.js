@@ -6,6 +6,22 @@ var model = require('./model');
 
 var ENTER_KEY = 13;
 
+function not(val) {
+  return !val;
+}
+
+function len(xs) {
+  return xs.length;
+}
+
+function checkedAttr(val) {
+  return val ? true : undefined;
+}
+
+function displayStyle(val) {
+  return val ? 'block' : 'none';
+}
+
 function container(contents, name, className) {
   var params = {name: name || 'div', contents: contents};
   if (className) {
@@ -46,6 +62,7 @@ function toggleCheckbox(text, oTodoData) {
       dom.element({
         name: 'input',
         attributes: {'class': 'toggle-all', type: 'checkbox'},
+        style: {display: oTodoData.map(len).map(displayStyle)},
         handlers: {
           click: onClick
         }
@@ -116,14 +133,6 @@ function newTodoItem(placeholderText, oTodoData) {
   });
 }
 
-function checkedAttr(val) {
-  return val ? true : undefined;
-}
-
-function displayStyle(val) {
-  return val ? 'block' : 'none';
-}
-
 function readModeTodoItem(attrs) {
   return dom.element({
     name: 'div',
@@ -146,14 +155,6 @@ function readModeTodoItem(attrs) {
       })
     ]
   });
-}
-
-function not(val) {
-  return !val;
-}
-
-function len(xs) {
-  return xs.length;
 }
 
 function writeModeTodoItem(attrs) {
