@@ -24,11 +24,11 @@ var eq = assert.deepEqual;
     text: pub('foo'),
     completed: pub(false)
   });
-  var readModeTodo = todo.contents[0];
-  var writeModeTodo = todo.contents[1];
+  var readModeTodo = todo.contents[1];
+  var writeModeTodo = todo.contents[2];
 
   // Ensure label contents is a list, not a string.
-  eq(readModeTodo.contents[1].contents.get(), ['foo']);
+  eq(readModeTodo.contents[0].contents.get(), ['foo']);
 
   // Test intial state.
   eq(readModeTodo.style.display.get(), 'block');
@@ -51,10 +51,9 @@ var eq = assert.deepEqual;
     text: pub('a'),
     completed: pub(false)
   });
-  var readModeTodo = todo.contents[0];
 
   // Test initial state.
-  var checkbox = readModeTodo.contents[0];
+  var checkbox = todo.contents[0];
   eq(checkbox.attributes.checked.get(), undefined);
 
   // Test state after clicking.
@@ -138,8 +137,8 @@ var eq = assert.deepEqual;
 (function(){
   var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
   var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
-  var readModeTodo = todo.contents[0];
-  var destroyButton = readModeTodo.contents[2];
+  var readModeTodo = todo.contents[1];
+  var destroyButton = readModeTodo.contents[1];
 
   eq(oTodoData.get().length, 1);
 
