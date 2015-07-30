@@ -124,6 +124,14 @@ var eq = assert.deepEqual;
   // Verify the handler is called.
   item.handlers.keyup({keyCode: 13, target: {value: 'bar'}});
   eq(oTodoData.get().length, 1);
+
+  // Verify trim both sides.
+  item.handlers.keyup({keyCode: 13, target: {value: '  bar  '}});
+  eq(oTodoData.get()[0].text.get(), 'bar');
+
+  // Verify empty trimmed string ignored.
+  item.handlers.keyup({keyCode: 13, target: {value: '  '}});
+  eq(oTodoData.get()[0].text.get(), 'bar');
 })();
 
 // Test removeItem.
