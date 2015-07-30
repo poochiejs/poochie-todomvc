@@ -59,6 +59,10 @@ function isObservableFalse(o) {
   return !o.get();
 }
 
+function isObservableTrue(o) {
+  return o.get();
+}
+
 function todoItemsLeftContents(items) {
   var itemsLeft = items.filter(isObservableFalse).length;
   return [
@@ -213,8 +217,48 @@ function listItem(xs) {
   return container(xs, 'li');
 }
 
+function clearButton(s, oTodoData) {
+  function onClick() {
+    // Iterate over the list backward and remove items
+    // by index when completed.
+    var todoData = oTodoData.get();
+    var item;
+    for (var i = todoData.length - 1; i >= 0; i--) {
+      item = todoData[i];
+      if (item.completed.get()) {
+        todoData.splice(i, 1);
+      }
+    }
+    oTodoData.set(todoData);
+  }
+
+  function visibleAttr(items) {
+    var itemsComplete = items.filter(isObservableTrue).length;
+    return itemsComplete > 0 ? 'visible' : 'hidden';
+  }
+
+  // An observable of observables.
+  var oCompletedFields = oTodoData.map(completedFields);
+
+  // Notified if any of item changes state, or if the total number of items
+  // changes.
+  var oCompletedTodoData = observable.subscriber(oCompletedFields, function() {
+    return oCompletedFields.get();
+  });
+
+  return dom.element({
+    name: 'button',
+    contents: [s],
+    attributes: {'class': 'clear-completed'},
+    style: {visibility: oCompletedTodoData.map(visibleAttr)},
+    handlers: {
+      click: onClick
+    }
+  });
+}
+
 module.exports = {
-  clearButton: function(s) { return container([s], 'button', 'clear-completed'); },
+  clearButton: clearButton,
   container: container,
   h1: function(s) { return container([s], 'h1'); },
   infoFooter: function(xs) { return container(xs, 'footer', 'info'); },

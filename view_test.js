@@ -173,5 +173,20 @@ var eq = assert.deepEqual;
   eq(oTodoData.get()[0].completed.get(), false);
 })();
 
+// Test clear completed button.
+(function(){
+  var oTodoData = pub([
+    {text: pub('a'), completed: pub(true)},
+    {text: pub('b'), completed: pub(false)},
+    {text: pub('c'), completed: pub(true)}
+  ]);
+  var button = view.clearButton('foo', oTodoData);
+  eq(button.style.visibility.get(), 'visible');
+
+  button.handlers.click();
+  eq(oTodoData.get()[0].text.get(), 'b');
+  eq(button.style.visibility.get(), 'hidden');
+})();
+
 module.exports = 'passed!';
 

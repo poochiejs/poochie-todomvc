@@ -22,7 +22,7 @@ module.exports = view.container([
         view.link('#/active', 'Active'),
         view.link('#/completed', 'Completed')
       ]),
-      view.clearButton('Clear completed')
+      view.clearButton('Clear completed', oTodoData)
     ])
   ]),
   view.infoFooter([
