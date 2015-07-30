@@ -283,6 +283,8 @@ var dom = require('poochie/dom');
 var observable = require('poochie/observable');
 var model = require('./model');
 
+var ENTER_KEY = 13;
+
 function container(contents, name, className) {
   var params = {name: name || 'div', contents: contents};
   if (className) {
@@ -361,8 +363,9 @@ function todoItemsLeft(oTodoData) {
 
 function newTodoItem(placeholderText, oTodoData) {
   function onKeyUp(evt) {
-    if (evt.keyCode === 13) {
-      model.addItem(evt.target.value, oTodoData);
+    var value = evt.target.value.trim();
+    if (evt.keyCode === ENTER_KEY && value) {
+      model.addItem(value, oTodoData);
       evt.target.value = '';
     }
   }
