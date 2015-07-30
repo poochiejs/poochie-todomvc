@@ -425,7 +425,12 @@ function writeModeTodoItem(attrs) {
     style: {'display': attrs.readMode.map(not).map(displayStyle)},
     handlers: {
       'change': function onChange(evt) {
-        attrs.text.set(evt.target.value);
+        var value = evt.target.value.trim();
+        if (value === '') {
+          model.removeItem(attrs.index, attrs.oTodoData);
+        } else {
+          attrs.text.set(value);
+        }
         attrs.readMode.set(true);
       }
     }
