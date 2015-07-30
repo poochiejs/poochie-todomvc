@@ -158,5 +158,20 @@ var eq = assert.deepEqual;
   eq(oTodoData.get().length, 0);
 })();
 
+// Test marking all items complete.
+(function(){
+  var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
+  var toggle = view.toggleCheckbox('foo', oTodoData);
+  var checkbox = toggle.contents[0];
+
+  // Test checking 'true' sets all items to complete.
+  checkbox.handlers.click({target: {checked: true}});
+  eq(oTodoData.get()[0].completed.get(), true);
+
+  // Test checking 'false' sets all items to incomplete.
+  checkbox.handlers.click({target: {checked: false}});
+  eq(oTodoData.get()[0].completed.get(), false);
+})();
+
 module.exports = 'passed!';
 

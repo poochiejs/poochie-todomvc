@@ -27,7 +27,13 @@ function link(href, text) {
   });
 }
 
-function toggleCheckbox(text) {
+function toggleCheckbox(text, oTodoData) {
+  function onClick(evt) {
+    oTodoData.get().forEach(function(item) {
+      item.completed.set(evt.target.checked);
+    });
+  }
+
   var toggleAllLabel = dom.element({
     name: 'label',
     attributes: {'for': 'toggle-all'},
@@ -39,7 +45,10 @@ function toggleCheckbox(text) {
     contents: [
       dom.element({
         name: 'input',
-        attributes: {'class': 'toggle-all', type: 'checkbox'}
+        attributes: {'class': 'toggle-all', type: 'checkbox'},
+        handlers: {
+          click: onClick
+        }
       }),
       toggleAllLabel
     ]
