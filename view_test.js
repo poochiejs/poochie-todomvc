@@ -57,11 +57,11 @@ var eq = assert.deepEqual;
   eq(checkbox.attributes.checked.get(), undefined);
 
   // Test state after clicking.
-  checkbox.handlers.click();
+  checkbox.handlers.click({target: {checked: true}});
   eq(checkbox.attributes.checked.get(), true);
 
   // Test state after clicking again.
-  checkbox.handlers.click();
+  checkbox.handlers.click({target: {checked: false}});
   eq(checkbox.attributes.checked.get(), undefined);
 })();
 

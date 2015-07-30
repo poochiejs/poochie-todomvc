@@ -201,7 +201,7 @@ function todoItem(oTodoData, attrs, index) {
           checked: itemAttrs.completed.map(checkedAttr)
         },
         handlers: {
-          'click': function() { itemAttrs.completed.set(!itemAttrs.completed.get()); }
+          click: function(evt) { itemAttrs.completed.set(evt.target.checked); }
         }
       }),
       readModeTodoItem(itemAttrs),
