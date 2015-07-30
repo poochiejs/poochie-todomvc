@@ -211,7 +211,7 @@ module.exports = view.container([
       view.newTodoItem('What needs to be done?', oTodoData)
     ]),
     view.mainSection([
-      view.toggleCheckbox('Mark all as complete'),
+      view.toggleCheckbox('Mark all as complete', oTodoData),
       view.todoList(oTodoData)
     ]),
     view.todoFooter([
@@ -221,8 +221,8 @@ module.exports = view.container([
         view.link('#/active', 'Active'),
         view.link('#/completed', 'Completed')
       ]),
-      view.clearButton('Clear completed')
-    ])
+      view.clearButton('Clear completed', oTodoData)
+    ], oTodoData)
   ]),
   view.infoFooter([
     view.paragraph(['Double-click to edit a todo']),
@@ -285,6 +285,22 @@ var model = require('./model');
 
 var ENTER_KEY = 13;
 
+function not(val) {
+  return !val;
+}
+
+function len(xs) {
+  return xs.length;
+}
+
+function checkedAttr(val) {
+  return val ? true : undefined;
+}
+
+function displayStyle(val) {
+  return val ? 'block' : 'none';
+}
+
 function container(contents, name, className) {
   var params = {name: name || 'div', contents: contents};
   if (className) {
@@ -306,7 +322,13 @@ function link(href, text) {
   });
 }
 
-function toggleCheckbox(text) {
+function toggleCheckbox(text, oTodoData) {
+  function onClick(evt) {
+    oTodoData.get().forEach(function(item) {
+      item.completed.set(evt.target.checked);
+    });
+  }
+
   var toggleAllLabel = dom.element({
     name: 'label',
     attributes: {'for': 'toggle-all'},
@@ -318,7 +340,11 @@ function toggleCheckbox(text) {
     contents: [
       dom.element({
         name: 'input',
-        attributes: {'class': 'toggle-all', type: 'checkbox'}
+        attributes: {'class': 'toggle-all', type: 'checkbox'},
+        style: {display: oTodoData.map(len).map(displayStyle)},
+        handlers: {
+          click: onClick
+        }
       }),
       toggleAllLabel
     ]
@@ -327,6 +353,10 @@ function toggleCheckbox(text) {
 
 function isObservableFalse(o) {
   return !o.get();
+}
+
+function isObservableTrue(o) {
+  return o.get();
 }
 
 function todoItemsLeftContents(items) {
@@ -382,14 +412,6 @@ function newTodoItem(placeholderText, oTodoData) {
   });
 }
 
-function checkedAttr(val) {
-  return val ? true : undefined;
-}
-
-function displayStyle(val) {
-  return val ? 'block' : 'none';
-}
-
 function readModeTodoItem(attrs) {
   return dom.element({
     name: 'div',
@@ -412,10 +434,6 @@ function readModeTodoItem(attrs) {
       })
     ]
   });
-}
-
-function not(val) {
-  return !val;
 }
 
 function writeModeTodoItem(attrs) {
@@ -483,8 +501,57 @@ function listItem(xs) {
   return container(xs, 'li');
 }
 
+function clearButton(s, oTodoData) {
+  function onClick() {
+    // Iterate over the list backward and remove items
+    // by index when completed.
+    var todoData = oTodoData.get();
+    var item;
+    for (var i = todoData.length - 1; i >= 0; i--) {
+      item = todoData[i];
+      if (item.completed.get()) {
+        todoData.splice(i, 1);
+      }
+    }
+    oTodoData.set(todoData);
+  }
+
+  function visibleAttr(items) {
+    var itemsComplete = items.filter(isObservableTrue).length;
+    return itemsComplete > 0 ? 'visible' : 'hidden';
+  }
+
+  // An observable of observables.
+  var oCompletedFields = oTodoData.map(completedFields);
+
+  // Notified if any of item changes state, or if the total number of items
+  // changes.
+  var oCompletedTodoData = observable.subscriber(oCompletedFields, function() {
+    return oCompletedFields.get();
+  });
+
+  return dom.element({
+    name: 'button',
+    contents: [s],
+    attributes: {'class': 'clear-completed'},
+    style: {visibility: oCompletedTodoData.map(visibleAttr)},
+    handlers: {
+      click: onClick
+    }
+  });
+}
+
+function todoFooter(xs, oTodoData) {
+  return dom.element({
+    name: 'footer',
+    attributes: {'class': 'footer'},
+    style: {display: oTodoData.map(len).map(displayStyle)},
+    contents: xs
+  });
+}
+
 module.exports = {
-  clearButton: function(s) { return container([s], 'button', 'clear-completed'); },
+  clearButton: clearButton,
   container: container,
   h1: function(s) { return container([s], 'h1'); },
   infoFooter: function(xs) { return container(xs, 'footer', 'info'); },
@@ -494,7 +561,7 @@ module.exports = {
   newTodoItem: newTodoItem,
   paragraph: function(xs) { return container(xs, 'p'); },
   todoFilters: function(xs) { return container(xs.map(listItem), 'ul', 'filters'); },
-  todoFooter: function(xs) { return container(xs, 'footer', 'footer'); },
+  todoFooter: todoFooter,
   todoHeader: function(xs) { return container(xs, 'header', 'header'); },
   todoItem: todoItem,
   todoItemsLeft: todoItemsLeft,
