@@ -24,7 +24,14 @@ function addItem(text, oTodoData) {
   oTodoData.set(data);
 }
 
+function removeItem(idx, oTodoData) {
+  var data = oTodoData.get();
+  data.splice(idx, 1);
+  oTodoData.set(data);
+}
+
 module.exports = {
   addItem: addItem,
-  createObservableTodoData: createObservableTodoData
+  createObservableTodoData: createObservableTodoData,
+  removeItem: removeItem
 };

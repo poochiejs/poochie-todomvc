@@ -16,5 +16,15 @@ var eq = assert.deepEqual;
   eq(oTodoData.get().length, 1);
 })();
 
+(function testRemoveItem(){
+  var oTodoData = pub([{text: 'foo'}, {text: 'bar'}]);
+
+  model.removeItem(0, oTodoData);
+  eq(oTodoData.get().length, 1);
+
+  model.removeItem(0, oTodoData);
+  eq(oTodoData.get().length, 0);
+})();
+
 module.exports = 'passed!';
 

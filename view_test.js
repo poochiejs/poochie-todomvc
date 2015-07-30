@@ -20,7 +20,7 @@ var eq = assert.deepEqual;
 
 // Test double-clicking todo items.
 (function(){
-  var todo = view.todoItem({
+  var todo = view.todoItem(pub([]), {
     text: pub('foo'),
     completed: pub(false)
   });
@@ -47,7 +47,7 @@ var eq = assert.deepEqual;
 
 // Test marking item as complete.
 (function(){
-  var todo = view.todoItem({
+  var todo = view.todoItem(pub([]), {
     text: pub('a'),
     completed: pub(false)
   });
@@ -68,10 +68,10 @@ var eq = assert.deepEqual;
 
 // Test todoItem class attribute.
 (function(){
-  var todo = view.todoItem({text: pub('a'), completed: pub(false)});
+  var todo = view.todoItem(pub([]), {text: pub('a'), completed: pub(false)});
   eq(todo.attributes.class.get(), '');
 
-  var todo2 = view.todoItem({text: pub('a'), completed: pub(true)});
+  var todo2 = view.todoItem(pub([]), {text: pub('a'), completed: pub(true)});
   eq(todo2.attributes.class.get(), 'completed');
 })();
 
@@ -124,6 +124,19 @@ var eq = assert.deepEqual;
   // Verify the handler is called.
   item.handlers.keyup({keyCode: 13, target: {value: 'bar'}});
   eq(oTodoData.get().length, 1);
+})();
+
+// Test removeItem.
+(function(){
+  var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
+  var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
+  var readModeTodo = todo.contents[0];
+  var destroyButton = readModeTodo.contents[2];
+
+  eq(oTodoData.get().length, 1);
+
+  destroyButton.handlers.click();
+  eq(oTodoData.get().length, 0);
 })();
 
 module.exports = 'passed!';

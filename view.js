@@ -134,7 +134,10 @@ function readModeTodoItem(attrs) {
       }),
       dom.element({
         name: 'button',
-        attributes: {'class': 'destroy'}
+        attributes: {'class': 'destroy'},
+        handlers: {
+          'click': function() { model.removeItem(attrs.index, attrs.oTodoData); }
+        }
       })
     ]
   });
@@ -162,8 +165,10 @@ function completedClass(val) {
   return val ? 'completed' : '';
 }
 
-function todoItem(attrs) {
+function todoItem(oTodoData, attrs, index) {
   var itemAttrs = {
+    index: index,
+    oTodoData: oTodoData,
     text: attrs.text,
     completed: attrs.completed,
     readMode: observable.publisher(true)
@@ -179,11 +184,10 @@ function todoItem(attrs) {
   });
 }
 
-function todoItems(todoData) {
-  return todoData.map(todoItem);
-}
-
 function todoList(oTodoData) {
+  function todoItems(todoData) {
+    return todoData.map(todoItem.bind(null, oTodoData));
+  }
   var oItems = oTodoData.map(todoItems);
   return container(oItems, 'ul', 'todo-list');
 }
