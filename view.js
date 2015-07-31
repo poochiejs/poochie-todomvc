@@ -14,10 +14,6 @@ function len(xs) {
   return xs.length;
 }
 
-function checkedAttr(val) {
-  return val ? true : undefined;
-}
-
 function displayStyle(val) {
   return val ? 'block' : 'none';
 }
@@ -25,7 +21,7 @@ function displayStyle(val) {
 function container(contents, name, className) {
   var params = {name: name || 'div', contents: contents};
   if (className) {
-    params.attributes = {'class': className};
+    params.attributes = {className: className};
   }
   return dom.element(params);
 }
@@ -34,7 +30,7 @@ function link(href, text) {
   var oClass = observable.publisher(undefined);
   return dom.element({
     name: 'a',
-    attributes: {'class': oClass, href: href},
+    attributes: {className: oClass, href: href},
     contents: [text],
     handlers: {
       select: function() { oClass.set('selected'); },
@@ -46,29 +42,17 @@ function link(href, text) {
 function toggleCheckbox(text, oTodoData) {
   function onClick(evt) {
     oTodoData.get().forEach(function(item) {
-      item.completed.set(evt.target.checked);
+      item.completed.set(Boolean(evt.target.checked));
     });
   }
 
-  var toggleAllLabel = dom.element({
-    name: 'label',
-    attributes: {'for': 'toggle-all'},
-    contents: [text]
-  });
-
   return dom.element({
-    name: 'div',
-    contents: [
-      dom.element({
-        name: 'input',
-        attributes: {'class': 'toggle-all', type: 'checkbox'},
-        style: {display: oTodoData.map(len).map(displayStyle)},
-        handlers: {
-          click: onClick
-        }
-      }),
-      toggleAllLabel
-    ]
+    name: 'input',
+    attributes: {className: 'toggle-all', type: 'checkbox'},
+    style: {display: oTodoData.map(len).map(displayStyle)},
+    handlers: {
+      click: onClick
+    }
   });
 }
 
@@ -123,7 +107,7 @@ function newTodoItem(placeholderText, oTodoData) {
   return dom.element({
     name: 'input',
     attributes: {
-      'class': 'new-todo',
+      className: 'new-todo',
       placeholder: placeholderText,
       autofocus: true
     },
@@ -136,7 +120,7 @@ function newTodoItem(placeholderText, oTodoData) {
 function readModeTodoItem(attrs) {
   return dom.element({
     name: 'div',
-    attributes: {'class': 'view'},
+    attributes: {className: 'view'},
     style: {'display': attrs.readMode.map(displayStyle)},
     handlers: {
       'dblclick': function onDblClick() { attrs.readMode.set(false); }
@@ -148,7 +132,7 @@ function readModeTodoItem(attrs) {
       }),
       dom.element({
         name: 'button',
-        attributes: {'class': 'destroy'},
+        attributes: {className: 'destroy'},
         handlers: {
           'click': function() { model.removeItem(attrs.index, attrs.oTodoData); }
         }
@@ -160,7 +144,7 @@ function readModeTodoItem(attrs) {
 function writeModeTodoItem(attrs) {
   return dom.element({
     name: 'input',
-    attributes: {'class': 'edit', value: attrs.text},
+    attributes: {className: 'edit', value: attrs.text},
     style: {'display': attrs.readMode.map(not).map(displayStyle)},
     handlers: {
       'change': function onChange(evt) {
@@ -191,14 +175,14 @@ function todoItem(oTodoData, attrs, index) {
 
   return dom.element({
     name: 'li',
-    attributes: {'class': itemAttrs.completed.map(completedClass)},
+    attributes: {className: itemAttrs.completed.map(completedClass)},
     contents: [
       dom.element({
         name: 'input',
         attributes: {
-          'class': 'toggle',
+          className: 'toggle',
           type: 'checkbox',
-          checked: itemAttrs.completed.map(checkedAttr)
+          checked: itemAttrs.completed
         },
         handlers: {
           click: function(evt) { itemAttrs.completed.set(evt.target.checked); }
@@ -254,7 +238,7 @@ function clearButton(s, oTodoData) {
   return dom.element({
     name: 'button',
     contents: [s],
-    attributes: {'class': 'clear-completed'},
+    attributes: {className: 'clear-completed'},
     style: {visibility: oCompletedTodoData.map(visibleAttr)},
     handlers: {
       click: onClick
@@ -265,7 +249,7 @@ function clearButton(s, oTodoData) {
 function todoFooter(xs, oTodoData) {
   return dom.element({
     name: 'footer',
-    attributes: {'class': 'footer'},
+    attributes: {className: 'footer'},
     style: {display: oTodoData.map(len).map(displayStyle)},
     contents: xs
   });

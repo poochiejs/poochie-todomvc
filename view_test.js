@@ -9,13 +9,13 @@ var eq = assert.deepEqual;
 // Test link event handlers.
 (function(){
   var link = view.link('a.b.c', 'A');
-  eq(link.attributes.class.get(), undefined);
+  eq(link.attributes.className.get(), undefined);
 
   link.handlers.select();
-  eq(link.attributes.class.get(), 'selected');
+  eq(link.attributes.className.get(), 'selected');
 
   link.handlers.blur();
-  eq(link.attributes.class.get(), undefined);
+  eq(link.attributes.className.get(), undefined);
 })();
 
 // Test double-clicking todo items.
@@ -54,7 +54,7 @@ var eq = assert.deepEqual;
 
   // Test initial state.
   var checkbox = todo.contents[0];
-  eq(checkbox.attributes.checked.get(), undefined);
+  eq(checkbox.attributes.checked.get(), false);
 
   // Test state after clicking.
   checkbox.handlers.click({target: {checked: true}});
@@ -62,16 +62,16 @@ var eq = assert.deepEqual;
 
   // Test state after clicking again.
   checkbox.handlers.click({target: {checked: false}});
-  eq(checkbox.attributes.checked.get(), undefined);
+  eq(checkbox.attributes.checked.get(), false);
 })();
 
-// Test todoItem class attribute.
+// Test todoItem className attribute.
 (function(){
   var todo = view.todoItem(pub([]), {text: pub('a'), completed: pub(false)});
-  eq(todo.attributes.class.get(), '');
+  eq(todo.attributes.className.get(), '');
 
   var todo2 = view.todoItem(pub([]), {text: pub('a'), completed: pub(true)});
-  eq(todo2.attributes.class.get(), 'completed');
+  eq(todo2.attributes.className.get(), 'completed');
 })();
 
 // Test todoList.
@@ -80,7 +80,7 @@ var eq = assert.deepEqual;
   var todoList = view.todoList(oTodoData);
   oTodoData.set([{text: pub('a'), completed: pub(false)}]);
   var todo = todoList.contents.get()[0];
-  eq(todo.attributes.class.get(), '');
+  eq(todo.attributes.className.get(), '');
 })();
 
 // Test todoItemsLeftContents.
@@ -161,8 +161,7 @@ var eq = assert.deepEqual;
 // Test marking all items complete.
 (function(){
   var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-  var toggle = view.toggleCheckbox('foo', oTodoData);
-  var checkbox = toggle.contents[0];
+  var checkbox = view.toggleCheckbox('foo', oTodoData);
 
   // Test checking 'true' sets all items to complete.
   checkbox.handlers.click({target: {checked: true}});
@@ -170,6 +169,10 @@ var eq = assert.deepEqual;
 
   // Test checking 'false' sets all items to incomplete.
   checkbox.handlers.click({target: {checked: false}});
+  eq(oTodoData.get()[0].completed.get(), false);
+
+  // Value may be true/false/undefined. Check that it's converted to a Boolean.
+  checkbox.handlers.click({target: {}});
   eq(oTodoData.get()[0].completed.get(), false);
 })();
 
