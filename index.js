@@ -4,6 +4,7 @@ var model = require('./model');
 var view = require('./view');
 
 var oTodoData = model.createObservableTodoData();
+model.autoSave(oTodoData);
 
 module.exports = view.container([
   view.todoSection([

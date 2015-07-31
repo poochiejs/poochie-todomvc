@@ -1,21 +1,13 @@
 'use strict';
 
 var observable = require('poochie/observable');
+var localStorage = require('localStorage');
 
 function observeTodoItemData(data) {
   return {
     text: observable.publisher(data.text),
     completed: observable.publisher(Boolean(data.completed))
   };
-}
-
-var rawTodoData = [
-  {text: 'Taste JavaScript', completed: true},
-  {text: 'Buy a unicorn'}
-];
-
-function createObservableTodoData() {
-  return observable.publisher(rawTodoData.map(observeTodoItemData));
 }
 
 function addItem(text, oTodoData) {
@@ -43,10 +35,26 @@ function completedField(item) {
   return item.completed;
 }
 
+// Return the value of the 'text' field.
+function textField(item) {
+  return item.text;
+}
+
+// Return an array of only the value of the 'completed' field
+// from the input array.
+function textFields(data) {
+  return data.map(textField);
+}
+
 // Return an array of only the value of the 'completed' field
 // from the input array.
 function completedFields(data) {
   return data.map(completedField);
+}
+
+// Return an array of all observables in the todoList.
+function observableFields(data) {
+  return textFields(data).concat(completedFields(data));
 }
 
 // Return an observable array where each item is an observable
@@ -84,8 +92,32 @@ function oGetItemsCompletedCount(oItems) {
   return getIsCompletedFields(oItems).map(getTrueCount);
 }
 
+function save(oTodoList) {
+  var todoList = observable.snapshot(oTodoList);
+  var todoData = JSON.stringify(todoList);
+  localStorage.setItem('todoData', todoData);
+}
+
+function createObservableTodoData() {
+  var todoData = localStorage.getItem('todoData');
+  var todoList = JSON.parse(todoData) || [];
+  return observable.publisher(todoList.map(observeTodoItemData));
+}
+
+function autoSave(oTodoList) {
+  var oFields = oTodoList.map(observableFields);
+  var oTodoFields = observable.subscriber(oFields, function() {
+    return oFields.get();
+  });
+  oTodoFields.invalidate = function() {
+    oTodoFields.get();
+    save(oTodoList);
+  };
+}
+
 module.exports = {
   addItem: addItem,
+  autoSave: autoSave,
   createObservableTodoData: createObservableTodoData,
   getIsCompletedFields: getIsCompletedFields,
   oGetItemsLeftCount: oGetItemsLeftCount,
