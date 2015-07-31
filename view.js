@@ -48,7 +48,11 @@ function toggleCheckbox(text, oTodoData) {
 
   return dom.element({
     name: 'input',
-    attributes: {className: 'toggle-all', type: 'checkbox'},
+    attributes: {
+      className: 'toggle-all',
+      type: 'checkbox',
+      checked: model.oGetItemsLeftCount(oTodoData).map(not)
+    },
     style: {display: oTodoData.map(len).map(displayStyle)},
     handlers: {
       click: onClick
@@ -56,40 +60,15 @@ function toggleCheckbox(text, oTodoData) {
   });
 }
 
-function isObservableFalse(o) {
-  return !o.get();
-}
-
-function isObservableTrue(o) {
-  return o.get();
-}
-
-function todoItemsLeftContents(items) {
-  var itemsLeft = items.filter(isObservableFalse).length;
+function todoItemsLeftContents(itemsLeft) {
   return [
      dom.element({name: 'strong', contents: [String(itemsLeft)]}),
      ' item' + (itemsLeft === 1 ? '' : 's') + ' left'
   ];
 }
 
-function completedField(item) {
-  return item.completed;
-}
-
-function completedFields(data) {
-  return data.map(completedField);
-}
-
 function oTodoItemsLeftContents(oItems) {
-  // An observable of observables.
-  var oCompletedFields = oItems.map(completedFields);
-
-  // Notified if any of item changes state, or if the total number of items
-  // changes.
-  var oCompletedTodoData = observable.subscriber(oCompletedFields, function() {
-    return oCompletedFields.get();
-  });
-  return oCompletedTodoData.map(todoItemsLeftContents);
+  return model.oGetItemsLeftCount(oItems).map(todoItemsLeftContents);
 }
 
 function todoItemsLeft(oTodoData) {
@@ -221,25 +200,17 @@ function clearButton(s, oTodoData) {
     oTodoData.set(todoData);
   }
 
-  function visibleAttr(items) {
-    var itemsComplete = items.filter(isObservableTrue).length;
+  function visibleAttr(itemsComplete) {
     return itemsComplete > 0 ? 'visible' : 'hidden';
   }
-
-  // An observable of observables.
-  var oCompletedFields = oTodoData.map(completedFields);
-
-  // Notified if any of item changes state, or if the total number of items
-  // changes.
-  var oCompletedTodoData = observable.subscriber(oCompletedFields, function() {
-    return oCompletedFields.get();
-  });
 
   return dom.element({
     name: 'button',
     contents: [s],
     attributes: {className: 'clear-completed'},
-    style: {visibility: oCompletedTodoData.map(visibleAttr)},
+    style: {
+      visibility: model.oGetItemsCompletedCount(oTodoData).map(visibleAttr)
+    },
     handlers: {
       click: onClick
     }
@@ -270,7 +241,6 @@ module.exports = {
   todoHeader: function(xs) { return container(xs, 'header', 'header'); },
   todoItem: todoItem,
   todoItemsLeft: todoItemsLeft,
-  todoItemsLeftContents: todoItemsLeftContents,
   todoList: todoList,
   todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
   toggleCheckbox: toggleCheckbox,

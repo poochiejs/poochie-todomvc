@@ -83,19 +83,6 @@ var eq = assert.deepEqual;
   eq(todo.attributes.className.get(), '');
 })();
 
-// Test todoItemsLeftContents.
-(function(){
-  function itemsLeft(items) {
-    var cnts = view.todoItemsLeftContents(items);
-    return cnts[0].contents[0] + cnts[1];
-  }
-
-  eq(itemsLeft([]), '0 items left');
-  eq(itemsLeft([pub(true)]), '0 items left');
-  eq(itemsLeft([pub(false)]), '1 item left');
-  eq(itemsLeft([pub(false), pub(false)]), '2 items left');
-})();
-
 // Test todoItemsLeft.
 (function(){
   function itemsLeft(oItems) {
