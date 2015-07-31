@@ -2,6 +2,64 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 
 },{}],2:[function(require,module,exports){
 (function (global){
+// http://www.rajdeepd.com/articles/chrome/localstrg/LocalStorageSample.htm
+
+// NOTE:
+// this varies from actual localStorage in some subtle ways
+
+// also, there is no persistence
+// TODO persist
+(function () {
+  "use strict";
+
+  var db;
+
+  function LocalStorage() {
+  }
+  db = LocalStorage;
+
+  db.prototype.getItem = function (key) {
+    if (this.hasOwnProperty(key)) {
+      return String(this[key]);
+    }
+    return null;
+  };
+
+  db.prototype.setItem = function (key, val) {
+    this[key] = String(val);
+  };
+
+  db.prototype.removeItem = function (key) {
+    delete this[key];
+  };
+
+  db.prototype.clear = function () {
+    var self = this;
+    Object.keys(self).forEach(function (key) {
+      self[key] = undefined;
+      delete self[key];
+    });
+  };
+
+  db.prototype.key = function (i) {
+    i = i || 0;
+    return Object.keys(this)[i];
+  };
+
+  db.prototype.__defineGetter__('length', function () {
+    return Object.keys(this).length;
+  });
+
+  if (global.localStorage) {
+    module.exports = localStorage;
+  } else {
+    module.exports = new LocalStorage();
+  }
+}());
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(require,module,exports){
+(function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
 var minDoc = require('min-document');
@@ -19,7 +77,7 @@ if (typeof document !== 'undefined') {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":1}],3:[function(require,module,exports){
+},{"min-document":1}],4:[function(require,module,exports){
 //
 // Observable JS
 //
@@ -203,6 +261,7 @@ var model = require('./model');
 var view = require('./view');
 
 var oTodoData = model.createObservableTodoData();
+model.autoSave(oTodoData);
 
 module.exports = view.container([
   view.todoSection([
@@ -241,21 +300,13 @@ module.exports = view.container([
 'use strict';
 
 var observable = require('poochie/observable');
+var localStorage = require('localStorage');
 
 function observeTodoItemData(data) {
   return {
     text: observable.publisher(data.text),
     completed: observable.publisher(Boolean(data.completed))
   };
-}
-
-var rawTodoData = [
-  {text: 'Taste JavaScript', completed: true},
-  {text: 'Buy a unicorn'}
-];
-
-function createObservableTodoData() {
-  return observable.publisher(rawTodoData.map(observeTodoItemData));
 }
 
 function addItem(text, oTodoData) {
@@ -283,10 +334,26 @@ function completedField(item) {
   return item.completed;
 }
 
+// Return the value of the 'text' field.
+function textField(item) {
+  return item.text;
+}
+
+// Return an array of only the value of the 'completed' field
+// from the input array.
+function textFields(data) {
+  return data.map(textField);
+}
+
 // Return an array of only the value of the 'completed' field
 // from the input array.
 function completedFields(data) {
   return data.map(completedField);
+}
+
+// Return an array of all observables in the todoList.
+function observableFields(data) {
+  return textFields(data).concat(completedFields(data));
 }
 
 // Return an observable array where each item is an observable
@@ -324,8 +391,32 @@ function oGetItemsCompletedCount(oItems) {
   return getIsCompletedFields(oItems).map(getTrueCount);
 }
 
+function save(oTodoList) {
+  var todoList = observable.snapshot(oTodoList);
+  var todoData = JSON.stringify(todoList);
+  localStorage.setItem('todoData', todoData);
+}
+
+function createObservableTodoData() {
+  var todoData = localStorage.getItem('todoData');
+  var todoList = JSON.parse(todoData) || [];
+  return observable.publisher(todoList.map(observeTodoItemData));
+}
+
+function autoSave(oTodoList) {
+  var oFields = oTodoList.map(observableFields);
+  var oTodoFields = observable.subscriber(oFields, function() {
+    return oFields.get();
+  });
+  oTodoFields.invalidate = function() {
+    oTodoFields.get();
+    save(oTodoList);
+  };
+}
+
 module.exports = {
   addItem: addItem,
+  autoSave: autoSave,
   createObservableTodoData: createObservableTodoData,
   getIsCompletedFields: getIsCompletedFields,
   oGetItemsLeftCount: oGetItemsLeftCount,
@@ -333,7 +424,7 @@ module.exports = {
   removeItem: removeItem
 };
 
-},{"poochie/observable":3}],"/view.js":[function(require,module,exports){
+},{"localStorage":2,"poochie/observable":4}],"/view.js":[function(require,module,exports){
 'use strict';
 
 var dom = require('poochie/dom');
@@ -584,7 +675,7 @@ module.exports = {
   writeModeTodoItem: writeModeTodoItem
 };
 
-},{"./model":"/model.js","poochie/dom":"poochie/dom","poochie/observable":3}],"poochie/dom":[function(require,module,exports){
+},{"./model":"/model.js","poochie/dom":"poochie/dom","poochie/observable":4}],"poochie/dom":[function(require,module,exports){
 //
 // Module name:
 //
@@ -798,4 +889,4 @@ module.exports = {
     render: render
 };
 
-},{"./observable":3,"global/document":2}]},{},[]);
+},{"./observable":4,"global/document":3}]},{},[]);
