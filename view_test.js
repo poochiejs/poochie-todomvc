@@ -24,25 +24,22 @@ var eq = assert.deepEqual;
     text: pub('foo'),
     completed: pub(false)
   });
-  var readModeTodo = todo.contents[1];
-  var writeModeTodo = todo.contents[2];
+  var readModeTodo = todo.contents[0];
+  var writeModeTodo = todo.contents[1];
 
   // Ensure label contents is a list, not a string.
-  eq(readModeTodo.contents[0].contents.get(), ['foo']);
+  eq(readModeTodo.contents[1].contents.get(), ['foo']);
 
-  // Test intial state.
-  eq(readModeTodo.style.display.get(), 'block');
-  eq(writeModeTodo.style.display.get(), 'none');
+  // Test initial state.
+  eq(todo.attributes.className.get(), '');
 
   // Test state after double-clicking.
   readModeTodo.handlers.dblclick();
-  eq(readModeTodo.style.display.get(), 'none');
-  eq(writeModeTodo.style.display.get(), 'block');
+  eq(todo.attributes.className.get(), 'editing');
 
   // Test state after changing the text.
   writeModeTodo.handlers.change({target: {value: 'bar'}});
-  eq(readModeTodo.style.display.get(), 'block');
-  eq(writeModeTodo.style.display.get(), 'none');
+  eq(todo.attributes.className.get(), '');
 })();
 
 // Test marking item as complete.
@@ -53,7 +50,7 @@ var eq = assert.deepEqual;
   });
 
   // Test initial state.
-  var checkbox = todo.contents[0];
+  var checkbox = todo.contents[0].contents[0];
   eq(checkbox.attributes.checked.get(), false);
 
   // Test state after clicking.
@@ -120,12 +117,12 @@ var eq = assert.deepEqual;
   eq(oTodoData.get()[0].text.get(), 'bar');
 })();
 
-// Test removeItem.
+//// Test removeItem.
 (function(){
   var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
   var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
-  var readModeTodo = todo.contents[1];
-  var destroyButton = readModeTodo.contents[1];
+  var readModeTodo = todo.contents[0];
+  var destroyButton = readModeTodo.contents[2];
 
   eq(oTodoData.get().length, 1);
 
@@ -137,7 +134,7 @@ var eq = assert.deepEqual;
 (function(){
   var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
   var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
-  var writeModeTodo = todo.contents[2];
+  var writeModeTodo = todo.contents[1];
 
   eq(oTodoData.get().length, 1);
 
@@ -150,6 +147,9 @@ var eq = assert.deepEqual;
   var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
   var checkbox = view.toggleCheckbox('foo', oTodoData);
 
+  // Test checkbox is displayed when more than one item is in the todo list.
+  eq(checkbox.style.display.get(), 'block');
+
   // Test checking 'true' sets all items to complete.
   checkbox.handlers.click({target: {checked: true}});
   eq(oTodoData.get()[0].completed.get(), true);
@@ -161,6 +161,11 @@ var eq = assert.deepEqual;
   // Value may be true/false/undefined. Check that it's converted to a Boolean.
   checkbox.handlers.click({target: {}});
   eq(oTodoData.get()[0].completed.get(), false);
+
+  // Test that checking all items causes the toggleCheckbox to be checked.
+  oTodoData.get()[0].completed.set(true);
+  eq(checkbox.attributes.checked.get(), true);
+
 })();
 
 // Test clear completed button.

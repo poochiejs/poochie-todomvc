@@ -96,15 +96,36 @@ function newTodoItem(placeholderText, oTodoData) {
   });
 }
 
+function todoItemClass(completed, readMode) {
+  var classes = [];
+  if (completed) {
+    classes.push('completed');
+  }
+  if (!readMode) {
+    classes.push('editing');
+  }
+  return classes.join(' ');
+}
+
 function readModeTodoItem(attrs) {
   return dom.element({
     name: 'div',
     attributes: {className: 'view'},
-    style: {'display': attrs.readMode.map(displayStyle)},
     handlers: {
       'dblclick': function onDblClick() { attrs.readMode.set(false); }
     },
     contents: [
+      dom.element({
+        name: 'input',
+        attributes: {
+          className: 'toggle',
+          type: 'checkbox',
+          checked: attrs.completed
+        },
+        handlers: {
+          click: function(evt) { attrs.completed.set(evt.target.checked); }
+        }
+      }),
       dom.element({
         name: 'label',
         contents: attrs.text.map(function(x) { return [x]; })
@@ -124,7 +145,6 @@ function writeModeTodoItem(attrs) {
   return dom.element({
     name: 'input',
     attributes: {className: 'edit', value: attrs.text},
-    style: {'display': attrs.readMode.map(not).map(displayStyle)},
     handlers: {
       'change': function onChange(evt) {
         var value = evt.target.value.trim();
@@ -139,10 +159,6 @@ function writeModeTodoItem(attrs) {
   });
 }
 
-function completedClass(val) {
-  return val ? 'completed' : '';
-}
-
 function todoItem(oTodoData, attrs, index) {
   var itemAttrs = {
     index: index,
@@ -154,19 +170,10 @@ function todoItem(oTodoData, attrs, index) {
 
   return dom.element({
     name: 'li',
-    attributes: {className: itemAttrs.completed.map(completedClass)},
+    attributes: {
+      className: observable.subscriber([itemAttrs.completed, itemAttrs.readMode], todoItemClass)
+    },
     contents: [
-      dom.element({
-        name: 'input',
-        attributes: {
-          className: 'toggle',
-          type: 'checkbox',
-          checked: itemAttrs.completed
-        },
-        handlers: {
-          click: function(evt) { itemAttrs.completed.set(evt.target.checked); }
-        }
-      }),
       readModeTodoItem(itemAttrs),
       writeModeTodoItem(itemAttrs)
     ]
