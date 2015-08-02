@@ -82,7 +82,7 @@ function writeModeTodoItem(attrs, handlers) {
 	});
 }
 
-function todoItem(params) {
+function todoItemImpl(params) {
 	var attr = {
 		text: params.attributes.text,
 		completed: params.attributes.completed,
@@ -105,5 +105,6 @@ function todoItem(params) {
 }
 
 module.exports = {
-	todoItem: todoItem
+	todoItem: todoItemImpl,
+	todoItemImpl: todoItemImpl
 };

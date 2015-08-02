@@ -9,7 +9,7 @@ var eq = assert.deepEqual;
 
 // Test double-clicking todo items.
 (function(){
-	var todo = view.todoItem({
+	var todo = view.todoItemImpl({
 		attributes: {text: pub('foo'), completed: pub(false)}
 	});
 	var readModeTodo = todo.contents[0];
@@ -42,7 +42,7 @@ var eq = assert.deepEqual;
 
 // Test marking item as complete.
 (function(){
-	var todo = view.todoItem({
+	var todo = view.todoItemImpl({
 		attributes: {text: pub('a'), completed: pub(false)}
 	});
 
@@ -61,12 +61,12 @@ var eq = assert.deepEqual;
 
 // Test todoItem className attribute.
 (function(){
-	var todo = view.todoItem({
+	var todo = view.todoItemImpl({
 		attributes: {text: pub('a'), completed: pub(false)}
 	});
 	eq(todo.attributes.className.get(), '');
 
-	var todo2 = view.todoItem({
+	var todo2 = view.todoItemImpl({
 		attributes: {text: pub('a'), completed: pub(true)}
 	});
 	eq(todo2.attributes.className.get(), 'completed');
@@ -75,7 +75,7 @@ var eq = assert.deepEqual;
 // Test removeItem.
 (function(){
 	var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-	var todo = view.todoItem({
+	var todo = view.todoItemImpl({
 		attributes: oTodoData.get()[0],
 		handlers: {remove: function() { model.removeItem(0, oTodoData); }}
 	});
@@ -91,7 +91,7 @@ var eq = assert.deepEqual;
 // Test removeItem by editing.
 (function(){
 	var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-	var todo = view.todoItem({
+	var todo = view.todoItemImpl({
 		attributes: oTodoData.get()[0],
 		handlers: {remove: function() { model.removeItem(0, oTodoData); }}
 	});
