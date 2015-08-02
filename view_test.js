@@ -134,10 +134,17 @@ var eq = assert.deepEqual;
 (function(){
   var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
   var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
+  var readModeTodo = todo.contents[0];
   var writeModeTodo = todo.contents[1];
 
+  // Ensure nothing happens if in read-mode.
+  writeModeTodo.handlers.change({target: {value: ''}});
   eq(oTodoData.get().length, 1);
 
+  // Enter write mode.
+  readModeTodo.handlers.dblclick();
+
+  // Ensure empty trimmed string causes item to be removed.
   writeModeTodo.handlers.change({target: {value: '   '}});
   eq(oTodoData.get().length, 0);
 })();

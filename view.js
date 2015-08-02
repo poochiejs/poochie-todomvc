@@ -143,6 +143,9 @@ function readModeTodoItem(attrs) {
 
 function writeModeTodoItem(attrs) {
   function onChange(evt) {
+    if (attrs.readMode.get()) {
+      return;
+    }
     var value = evt.target.value.trim();
     if (value === '') {
       model.removeItem(attrs.index, attrs.oTodoData);
