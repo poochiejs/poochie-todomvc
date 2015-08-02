@@ -142,19 +142,21 @@ function readModeTodoItem(attrs) {
 }
 
 function writeModeTodoItem(attrs) {
+  function onChange(evt) {
+    var value = evt.target.value.trim();
+    if (value === '') {
+      model.removeItem(attrs.index, attrs.oTodoData);
+    } else {
+      attrs.text.set(value);
+    }
+    attrs.readMode.set(true);
+  }
   return dom.element({
     name: 'input',
     attributes: {className: 'edit', value: attrs.text},
     handlers: {
-      'change': function onChange(evt) {
-        var value = evt.target.value.trim();
-        if (value === '') {
-          model.removeItem(attrs.index, attrs.oTodoData);
-        } else {
-          attrs.text.set(value);
-        }
-        attrs.readMode.set(true);
-      }
+      'change': onChange,
+      'blur': onChange
     }
   });
 }
