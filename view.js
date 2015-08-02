@@ -4,9 +4,9 @@ var dom = require('poochie/dom');
 var observable = require('poochie/observable');
 var model = require('./model');
 var prelude = require('./prelude');
+var todoitem = require('./view_todoitem');
 
 var ENTER_KEY = 13;
-var ESC_KEY = 27;
 
 function displayStyle(val) {
 	return val ? 'block' : 'none';
@@ -91,103 +91,6 @@ function newTodoItem(placeholderText, oTodoData) {
 	});
 }
 
-function todoItemClass(completed, readMode) {
-	var classes = [];
-	if (completed) {
-		classes.push('completed');
-	}
-	if (!readMode) {
-		classes.push('editing');
-	}
-	return classes.join(' ');
-}
-
-function readModeTodoItem(attrs) {
-	return dom.element({
-		name: 'div',
-		attributes: {className: 'view'},
-		handlers: {
-			'dblclick': function onDblClick() { attrs.readMode.set(false); }
-		},
-		contents: [
-			dom.element({
-				name: 'input',
-				attributes: {
-					className: 'toggle',
-					type: 'checkbox',
-					checked: attrs.completed
-				},
-				handlers: {
-					click: function(evt) { attrs.completed.set(evt.target.checked); }
-				}
-			}),
-			dom.element({
-				name: 'label',
-				contents: attrs.text.map(prelude.singleton)
-			}),
-			dom.element({
-				name: 'button',
-				attributes: {className: 'destroy'},
-				handlers: {
-					'click': function() { model.removeItem(attrs.index, attrs.oTodoData); }
-				}
-			})
-		]
-	});
-}
-
-function writeModeTodoItem(attrs) {
-	function onChange(evt) {
-		if (attrs.readMode.get()) {
-			return;
-		}
-		var value = evt.target.value.trim();
-		if (value === '') {
-			model.removeItem(attrs.index, attrs.oTodoData);
-		} else {
-			attrs.text.set(value);
-		}
-		attrs.readMode.set(true);
-	}
-	function onKeyUp(evt) {
-		if (evt.keyCode === ESC_KEY) {
-			evt.target.value = attrs.text.get();
-			attrs.readMode.set(true);
-		}
-	}
-	return dom.element({
-		name: 'input',
-		focus: attrs.readMode.map(prelude.not),
-		attributes: {className: 'edit', value: attrs.text},
-		handlers: {
-			'change': onChange,
-			'blur': onChange,
-			'keyup': onKeyUp
-		}
-	});
-}
-
-function todoItem(oTodoData, attrs, index) {
-	var itemAttrs = {
-		index: index,
-		oTodoData: oTodoData,
-		text: attrs.text,
-		completed: attrs.completed,
-		readMode: observable.publisher(true)
-	};
-
-	return dom.element({
-		name: 'li',
-		attributes: {
-			className: observable.subscriber([itemAttrs.completed, itemAttrs.readMode], todoItemClass)
-		},
-		contents: [
-			readModeTodoItem(itemAttrs),
-			writeModeTodoItem(itemAttrs)
-		]
-	});
-}
-
 function todoList(oTodoData, oFragment) {
 	function todoItems(todoData, fragment) {
 		if (fragment === '/active') {
@@ -195,7 +98,7 @@ function todoList(oTodoData, oFragment) {
 		} else if (fragment === '/completed') {
 			todoData = todoData.filter(function(x){ return x.completed.get(); });
 		}
-		return todoData.map(todoItem.bind(null, oTodoData));
+		return todoData.map(todoitem.todoItem.bind(null, oTodoData));
 	}
 	var oIsCompletedFields = model.getIsCompletedFields(oTodoData);
 	var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
@@ -260,11 +163,8 @@ module.exports = {
 	todoFilters: function(xs) { return container(xs.map(prelude.singleton).map(listItem), 'ul', 'filters'); },
 	todoFooter: todoFooter,
 	todoHeader: function(xs) { return container(xs, 'header', 'header'); },
-	todoItem: todoItem,
 	todoItemsLeft: todoItemsLeft,
 	todoList: todoList,
 	todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
-	toggleCheckbox: toggleCheckbox,
-	readModeTodoItem: readModeTodoItem,
-	writeModeTodoItem: writeModeTodoItem
+	toggleCheckbox: toggleCheckbox
 };
