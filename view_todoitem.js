@@ -2,7 +2,6 @@
 
 var dom = require('poochie/dom');
 var observable = require('poochie/observable');
-var model = require('./model');
 var prelude = require('./prelude');
 
 var ESC_KEY = 27;
@@ -18,7 +17,7 @@ function todoItemClass(completed, readMode) {
 	return classes.join(' ');
 }
 
-function readModeTodoItem(attrs) {
+function readModeTodoItem(attrs, handlers) {
 	return dom.element({
 		name: 'div',
 		attributes: {className: 'view'},
@@ -45,21 +44,21 @@ function readModeTodoItem(attrs) {
 				name: 'button',
 				attributes: {className: 'destroy'},
 				handlers: {
-					'click': function() { model.removeItem(attrs.index, attrs.oTodoData); }
+					'click': handlers.remove
 				}
 			})
 		]
 	});
 }
 
-function writeModeTodoItem(attrs) {
+function writeModeTodoItem(attrs, handlers) {
 	function onChange(evt) {
 		if (attrs.readMode.get()) {
 			return;
 		}
 		var value = evt.target.value.trim();
 		if (value === '') {
-			model.removeItem(attrs.index, attrs.oTodoData);
+			handlers.remove(evt);
 		} else {
 			attrs.text.set(value);
 		}
@@ -83,14 +82,15 @@ function writeModeTodoItem(attrs) {
 	});
 }
 
-function todoItem(oTodoData, attrs, index) {
+function todoItem(attrs, handlers) {
 	var itemAttrs = {
-		index: index,
-		oTodoData: oTodoData,
 		text: attrs.text,
 		completed: attrs.completed,
 		readMode: observable.publisher(true)
 	};
+
+	var itemHandlers = {};
+	itemHandlers.remove = handlers && handlers.remove ? handlers.remove : function () {};
 
 	return dom.element({
 		name: 'li',
@@ -98,8 +98,8 @@ function todoItem(oTodoData, attrs, index) {
 			className: observable.subscriber([itemAttrs.completed, itemAttrs.readMode], todoItemClass)
 		},
 		contents: [
-			readModeTodoItem(itemAttrs),
-			writeModeTodoItem(itemAttrs)
+			readModeTodoItem(itemAttrs, itemHandlers),
+			writeModeTodoItem(itemAttrs, itemHandlers)
 		]
 	});
 }

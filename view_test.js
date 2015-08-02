@@ -40,6 +40,10 @@ var eq = assert.deepEqual;
 	oTodoData.get()[0].completed.set(true);
 	eq(todoList.contents.get().length, 1);
 
+	// Test removing an item.
+	var removeButton = todoList.contents.get()[0].contents[0].contents[2];
+	removeButton.handlers.click();
+	eq(todoList.contents.get().length, 0);
 })();
 
 // Test todoItemsLeft.

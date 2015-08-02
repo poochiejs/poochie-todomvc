@@ -1,6 +1,7 @@
 'use strict';
 
 var view = require('./view_todoitem');
+var model = require('./model');
 var assert = require('assert');
 var observable = require('poochie/observable');
 var pub = observable.publisher;
@@ -8,7 +9,7 @@ var eq = assert.deepEqual;
 
 // Test double-clicking todo items.
 (function(){
-	var todo = view.todoItem(pub([]), {
+	var todo = view.todoItem({
 		text: pub('foo'),
 		completed: pub(false)
 	});
@@ -36,11 +37,13 @@ var eq = assert.deepEqual;
 	// Test that a non-escape key has no effect.
 	writeModeTodo.handlers.keyup({keyCode: 42, target: {value: 'foo'}});
 
+	// Test that remove() handler is not required.
+	readModeTodo.contents[2].handlers.click();
 })();
 
 // Test marking item as complete.
 (function(){
-	var todo = view.todoItem(pub([]), {
+	var todo = view.todoItem({
 		text: pub('a'),
 		completed: pub(false)
 	});
@@ -60,17 +63,20 @@ var eq = assert.deepEqual;
 
 // Test todoItem className attribute.
 (function(){
-	var todo = view.todoItem(pub([]), {text: pub('a'), completed: pub(false)});
+	var todo = view.todoItem({text: pub('a'), completed: pub(false)});
 	eq(todo.attributes.className.get(), '');
 
-	var todo2 = view.todoItem(pub([]), {text: pub('a'), completed: pub(true)});
+	var todo2 = view.todoItem({text: pub('a'), completed: pub(true)});
 	eq(todo2.attributes.className.get(), 'completed');
 })();
 
-//// Test removeItem.
+// Test removeItem.
 (function(){
 	var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-	var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
+	var todo = view.todoItem(
+		oTodoData.get()[0],
+		{remove: function() { model.removeItem(0, oTodoData); }}
+	);
 	var readModeTodo = todo.contents[0];
 	var destroyButton = readModeTodo.contents[2];
 
@@ -83,7 +89,10 @@ var eq = assert.deepEqual;
 // Test removeItem by editing.
 (function(){
 	var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-	var todo = view.todoItem(oTodoData, oTodoData.get()[0]);
+	var todo = view.todoItem(
+		oTodoData.get()[0],
+		{remove: function() { model.removeItem(0, oTodoData); }}
+	);
 	var readModeTodo = todo.contents[0];
 	var writeModeTodo = todo.contents[1];
 

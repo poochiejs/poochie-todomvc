@@ -92,14 +92,22 @@ function newTodoItem(placeholderText, oTodoData) {
 }
 
 function todoList(oTodoData, oFragment) {
+	function todoItem(itemData, index) {
+		var handlers = {
+			remove: function() { model.removeItem(index, oTodoData); }
+                };
+		return todoitem.todoItem(itemData, handlers);
+	}
+
 	function todoItems(todoData, fragment) {
 		if (fragment === '/active') {
 			todoData = todoData.filter(function(x){ return !x.completed.get(); });
 		} else if (fragment === '/completed') {
 			todoData = todoData.filter(function(x){ return x.completed.get(); });
 		}
-		return todoData.map(todoitem.todoItem.bind(null, oTodoData));
+		return todoData.map(todoItem);
 	}
+
 	var oIsCompletedFields = model.getIsCompletedFields(oTodoData);
 	var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
 	return container(oItems, 'ul', 'todo-list');
