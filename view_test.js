@@ -25,8 +25,10 @@ var eq = assert.deepEqual;
 	var oFragment = pub('/');
 	var todoList = view.todoList(oTodoData, oFragment);
 	oTodoData.set([{text: pub('a'), completed: pub(false)}]);
-	var todo = todoList.contents.get()[0];
-	eq(todo.attributes.className.get(), '');
+
+	// Test 1 item in all.
+	oFragment.set('/');
+	eq(todoList.contents.get().length, 1);
 
 	// Test 1 item is active.
 	oFragment.set('/active');
@@ -41,8 +43,8 @@ var eq = assert.deepEqual;
 	eq(todoList.contents.get().length, 1);
 
 	// Test removing an item.
-	var removeButton = todoList.contents.get()[0].contents[0].contents[2];
-	removeButton.handlers.click();
+	var removeButton = todoList.contents.get()[0];
+	removeButton.handlers.remove();
 	eq(todoList.contents.get().length, 0);
 })();
 

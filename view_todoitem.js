@@ -104,7 +104,14 @@ function todoItemImpl(params) {
 	});
 }
 
+function todoItem(params) {
+	var e = {attributes: params.attributes, handlers: params.handlers};
+	e.render = function() { return todoItemImpl(e).render(); };
+	return e;
+}
+
+
 module.exports = {
-	todoItem: todoItemImpl,
+	todoItem: todoItem,
 	todoItemImpl: todoItemImpl
 };
