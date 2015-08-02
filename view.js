@@ -3,21 +3,10 @@
 var dom = require('poochie/dom');
 var observable = require('poochie/observable');
 var model = require('./model');
+var prelude = require('./prelude');
 
 var ENTER_KEY = 13;
 var ESC_KEY = 27;
-
-function not(val) {
-	return !val;
-}
-
-function len(xs) {
-	return xs.length;
-}
-
-function singleton(x) {
-	return [x];
-}
 
 function displayStyle(val) {
 	return val ? 'block' : 'none';
@@ -57,9 +46,9 @@ function toggleCheckbox(text, oTodoData) {
 		attributes: {
 			className: 'toggle-all',
 			type: 'checkbox',
-			checked: model.oGetItemsLeftCount(oTodoData).map(not)
+			checked: model.oGetItemsLeftCount(oTodoData).map(prelude.not)
 		},
-		style: {display: oTodoData.map(len).map(displayStyle)},
+		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
 		handlers: {
 			click: onClick
 		}
@@ -134,7 +123,7 @@ function readModeTodoItem(attrs) {
 			}),
 			dom.element({
 				name: 'label',
-				contents: attrs.text.map(singleton)
+				contents: attrs.text.map(prelude.singleton)
 			}),
 			dom.element({
 				name: 'button',
@@ -168,7 +157,7 @@ function writeModeTodoItem(attrs) {
 	}
 	return dom.element({
 		name: 'input',
-		focus: attrs.readMode.map(not),
+		focus: attrs.readMode.map(prelude.not),
 		attributes: {className: 'edit', value: attrs.text},
 		handlers: {
 			'change': onChange,
@@ -253,7 +242,7 @@ function todoFooter(xs, oTodoData) {
 	return dom.element({
 		name: 'footer',
 		attributes: {className: 'footer'},
-		style: {display: oTodoData.map(len).map(displayStyle)},
+		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
 		contents: xs
 	});
 }
@@ -268,7 +257,7 @@ module.exports = {
 	mainSection: function(xs) { return container(xs, 'section', 'main'); },
 	newTodoItem: newTodoItem,
 	paragraph: function(xs) { return container(xs, 'p'); },
-	todoFilters: function(xs) { return container(xs.map(singleton).map(listItem), 'ul', 'filters'); },
+	todoFilters: function(xs) { return container(xs.map(prelude.singleton).map(listItem), 'ul', 'filters'); },
 	todoFooter: todoFooter,
 	todoHeader: function(xs) { return container(xs, 'header', 'header'); },
 	todoItem: todoItem,
