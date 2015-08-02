@@ -583,6 +583,7 @@ function writeModeTodoItem(attrs) {
   }
   return dom.element({
     name: 'input',
+    focus: attrs.readMode.map(not),
     attributes: {className: 'edit', value: attrs.text},
     handlers: {
       'change': onChange,
@@ -818,6 +819,24 @@ function createElementAndSubscriber(ps) {
             e.addEventListener(k, es[k]);
         }
     }
+
+    if (ps.focus instanceof observable.Observable) {
+        subscriber.addArg(ps.focus.map(function setFocus(focus) {
+            function onTimeout() {
+                if (focus) {
+                    e.focus();
+                } else {
+                    e.blur();
+                }
+            }
+
+            // Use setTimeout so that focus is set after the DOM has had an
+            // opportunity to render other attributes that may have changed,
+            // such as style.display.
+            setTimeout(onTimeout, 0);
+        }));
+    }
+
     return {
         element: e,
         subscriber: subscriber
@@ -873,6 +892,10 @@ function ReactiveElement(as) {
 
     if (as.handlers !== undefined) {
         this.handlers = as.handlers;
+    }
+
+    if (as.focus instanceof observable.Observable) {
+        this.focus = as.focus;
     }
 }
 
