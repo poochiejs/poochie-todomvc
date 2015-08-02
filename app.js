@@ -263,6 +263,8 @@ var view = require('./view');
 var oTodoData = model.createObservableTodoData();
 model.autoSave(oTodoData);
 
+var oFragment = model.createObservableFragment();
+
 module.exports = view.container([
   view.todoSection([
     view.todoHeader([
@@ -271,14 +273,14 @@ module.exports = view.container([
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete', oTodoData),
-      view.todoList(oTodoData)
+      view.todoList(oTodoData, oFragment)
     ]),
     view.todoFooter([
       view.todoItemsLeft(oTodoData),
       view.todoFilters([
-        view.link('#/', 'All'),
-        view.link('#/active', 'Active'),
-        view.link('#/completed', 'Completed')
+        view.link('#/', 'All', oFragment),
+        view.link('#/active', 'Active', oFragment),
+        view.link('#/completed', 'Completed', oFragment)
       ]),
       view.clearButton('Clear completed', oTodoData)
     ], oTodoData)
@@ -297,10 +299,26 @@ module.exports = view.container([
 ]);
 
 },{"./model":"/model.js","./view":"/view.js"}],"/model.js":[function(require,module,exports){
+(function (global){
 'use strict';
 
 var observable = require('poochie/observable');
 var localStorage = require('localStorage');
+
+function createObservableFragment() {
+  var oFragment = observable.publisher('/');
+
+  function onHashChange() {
+    oFragment.set(global.location.hash.slice(1) || '/');
+  }
+
+  if (global.window) {
+    global.window.onhashchange = onHashChange;
+    onHashChange();
+  }
+
+  return oFragment;
+}
 
 function observeTodoItemData(data) {
   return {
@@ -417,6 +435,7 @@ function autoSave(oTodoList) {
 module.exports = {
   addItem: addItem,
   autoSave: autoSave,
+  createObservableFragment: createObservableFragment,
   createObservableTodoData: createObservableTodoData,
   getIsCompletedFields: getIsCompletedFields,
   oGetItemsLeftCount: oGetItemsLeftCount,
@@ -424,6 +443,7 @@ module.exports = {
   removeItem: removeItem
 };
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"localStorage":2,"poochie/observable":4}],"/view.js":[function(require,module,exports){
 'use strict';
 
@@ -432,6 +452,7 @@ var observable = require('poochie/observable');
 var model = require('./model');
 
 var ENTER_KEY = 13;
+var ESC_KEY = 27;
 
 function not(val) {
   return !val;
@@ -439,6 +460,10 @@ function not(val) {
 
 function len(xs) {
   return xs.length;
+}
+
+function singleton(x) {
+  return [x];
 }
 
 function displayStyle(val) {
@@ -453,16 +478,17 @@ function container(contents, name, className) {
   return dom.element(params);
 }
 
-function link(href, text) {
-  var oClass = observable.publisher(undefined);
+function link(href, text, oFragment) {
+  var oClass;
+  if (oFragment !== undefined) {
+    oClass = oFragment.map(function(fragment) {
+      return href === ('#' + fragment) ? 'selected' : '';
+    });
+  }
   return dom.element({
     name: 'a',
     attributes: {className: oClass, href: href},
-    contents: [text],
-    handlers: {
-      select: function() { oClass.set('selected'); },
-      blur: function() { oClass.set(undefined); }
-    }
+    contents: [text]
   });
 }
 
@@ -555,7 +581,7 @@ function readModeTodoItem(attrs) {
       }),
       dom.element({
         name: 'label',
-        contents: attrs.text.map(function(x) { return [x]; })
+        contents: attrs.text.map(singleton)
       }),
       dom.element({
         name: 'button',
@@ -581,13 +607,20 @@ function writeModeTodoItem(attrs) {
     }
     attrs.readMode.set(true);
   }
+  function onKeyUp(evt) {
+    if (evt.keyCode === ESC_KEY) {
+      evt.target.value = attrs.text.get();
+      attrs.readMode.set(true);
+    }
+  }
   return dom.element({
     name: 'input',
     focus: attrs.readMode.map(not),
     attributes: {className: 'edit', value: attrs.text},
     handlers: {
       'change': onChange,
-      'blur': onChange
+      'blur': onChange,
+      'keyup': onKeyUp
     }
   });
 }
@@ -613,11 +646,17 @@ function todoItem(oTodoData, attrs, index) {
   });
 }
 
-function todoList(oTodoData) {
-  function todoItems(todoData) {
+function todoList(oTodoData, oFragment) {
+  function todoItems(todoData, fragment) {
+    if (fragment === '/active') {
+      todoData = todoData.filter(function(x){ return !x.completed.get(); });
+    } else if (fragment === '/completed') {
+      todoData = todoData.filter(function(x){ return x.completed.get(); });
+    }
     return todoData.map(todoItem.bind(null, oTodoData));
   }
-  var oItems = oTodoData.map(todoItems);
+  var oIsCompletedFields = model.getIsCompletedFields(oTodoData);
+  var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
   return container(oItems, 'ul', 'todo-list');
 }
 
@@ -676,7 +715,7 @@ module.exports = {
   mainSection: function(xs) { return container(xs, 'section', 'main'); },
   newTodoItem: newTodoItem,
   paragraph: function(xs) { return container(xs, 'p'); },
-  todoFilters: function(xs) { return container(xs.map(listItem), 'ul', 'filters'); },
+  todoFilters: function(xs) { return container(xs.map(singleton).map(listItem), 'ul', 'filters'); },
   todoFooter: todoFooter,
   todoHeader: function(xs) { return container(xs, 'header', 'header'); },
   todoItem: todoItem,
