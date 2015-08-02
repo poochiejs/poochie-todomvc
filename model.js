@@ -3,6 +3,21 @@
 var observable = require('poochie/observable');
 var localStorage = require('localStorage');
 
+function createObservableFragment() {
+  var oFragment = observable.publisher('/');
+
+  function onHashChange() {
+    oFragment.set(global.location.hash.slice(1) || '/');
+  }
+
+  if (global.window) {
+    global.window.onhashchange = onHashChange;
+    onHashChange();
+  }
+
+  return oFragment;
+}
+
 function observeTodoItemData(data) {
   return {
     text: observable.publisher(data.text),
@@ -118,6 +133,7 @@ function autoSave(oTodoList) {
 module.exports = {
   addItem: addItem,
   autoSave: autoSave,
+  createObservableFragment: createObservableFragment,
   createObservableTodoData: createObservableTodoData,
   getIsCompletedFields: getIsCompletedFields,
   oGetItemsLeftCount: oGetItemsLeftCount,

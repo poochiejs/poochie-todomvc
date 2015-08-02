@@ -14,6 +14,10 @@ function len(xs) {
   return xs.length;
 }
 
+function singleton(x) {
+  return [x];
+}
+
 function displayStyle(val) {
   return val ? 'block' : 'none';
 }
@@ -26,16 +30,17 @@ function container(contents, name, className) {
   return dom.element(params);
 }
 
-function link(href, text) {
-  var oClass = observable.publisher(undefined);
+function link(href, text, oFragment) {
+  var oClass;
+  if (oFragment !== undefined) {
+    oClass = oFragment.map(function(fragment) {
+      return href === ('#' + fragment) ? 'selected' : '';
+    });
+  }
   return dom.element({
     name: 'a',
     attributes: {className: oClass, href: href},
-    contents: [text],
-    handlers: {
-      select: function() { oClass.set('selected'); },
-      blur: function() { oClass.set(undefined); }
-    }
+    contents: [text]
   });
 }
 
@@ -128,7 +133,7 @@ function readModeTodoItem(attrs) {
       }),
       dom.element({
         name: 'label',
-        contents: attrs.text.map(function(x) { return [x]; })
+        contents: attrs.text.map(singleton)
       }),
       dom.element({
         name: 'button',
@@ -186,11 +191,17 @@ function todoItem(oTodoData, attrs, index) {
   });
 }
 
-function todoList(oTodoData) {
-  function todoItems(todoData) {
+function todoList(oTodoData, oFragment) {
+  function todoItems(todoData, fragment) {
+    if (fragment === '/active') {
+      todoData = todoData.filter(function(x){ return !x.completed.get(); });
+    } else if (fragment === '/completed') {
+      todoData = todoData.filter(function(x){ return x.completed.get(); });
+    }
     return todoData.map(todoItem.bind(null, oTodoData));
   }
-  var oItems = oTodoData.map(todoItems);
+  var oIsCompletedFields = model.getIsCompletedFields(oTodoData);
+  var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
   return container(oItems, 'ul', 'todo-list');
 }
 
@@ -249,7 +260,7 @@ module.exports = {
   mainSection: function(xs) { return container(xs, 'section', 'main'); },
   newTodoItem: newTodoItem,
   paragraph: function(xs) { return container(xs, 'p'); },
-  todoFilters: function(xs) { return container(xs.map(listItem), 'ul', 'filters'); },
+  todoFilters: function(xs) { return container(xs.map(singleton).map(listItem), 'ul', 'filters'); },
   todoFooter: todoFooter,
   todoHeader: function(xs) { return container(xs, 'header', 'header'); },
   todoItem: todoItem,

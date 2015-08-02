@@ -71,5 +71,24 @@ var eq = assert.deepEqual;
   eq(load()[2].text, 'More stuff');
 })();
 
+(function testFragment(){
+  model.createObservableFragment();
+})();
+
+(function testFragmentWithWindow(){
+  global.window = {};
+
+  // Test empty URL.
+  global.location = {hash: ''};
+  model.createObservableFragment();
+
+  // Test URL with a fragment.
+  global.location = {hash: '#/'};
+  model.createObservableFragment();
+
+  delete global.location;
+  delete global.window;
+})();
+
 module.exports = 'passed!';
 

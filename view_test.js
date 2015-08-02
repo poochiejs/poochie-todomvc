@@ -8,14 +8,15 @@ var eq = assert.deepEqual;
 
 // Test link event handlers.
 (function(){
-  var link = view.link('a.b.c', 'A');
-  eq(link.attributes.className.get(), undefined);
+  var oFragment = pub('foo');
+  var link = view.link('#a.b.c', 'A', oFragment);
+  eq(link.attributes.className.get(), '');
 
-  link.handlers.select();
+  oFragment.set('a.b.c');
   eq(link.attributes.className.get(), 'selected');
 
-  link.handlers.blur();
-  eq(link.attributes.className.get(), undefined);
+  oFragment.set('bar');
+  eq(link.attributes.className.get(), '');
 })();
 
 // Test double-clicking todo items.
@@ -74,10 +75,24 @@ var eq = assert.deepEqual;
 // Test todoList.
 (function(){
   var oTodoData = pub([]);
-  var todoList = view.todoList(oTodoData);
+  var oFragment = pub('/');
+  var todoList = view.todoList(oTodoData, oFragment);
   oTodoData.set([{text: pub('a'), completed: pub(false)}]);
   var todo = todoList.contents.get()[0];
   eq(todo.attributes.className.get(), '');
+
+  // Test 1 item is active.
+  oFragment.set('/active');
+  eq(todoList.contents.get().length, 1);
+
+  // Test 0 items are completed.
+  oFragment.set('/completed');
+  eq(todoList.contents.get().length, 0);
+
+  // Test that todoList updates if an item is marked completed.
+  oTodoData.get()[0].completed.set(true);
+  eq(todoList.contents.get().length, 1);
+
 })();
 
 // Test todoItemsLeft.

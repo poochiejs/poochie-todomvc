@@ -6,6 +6,8 @@ var view = require('./view');
 var oTodoData = model.createObservableTodoData();
 model.autoSave(oTodoData);
 
+var oFragment = model.createObservableFragment();
+
 module.exports = view.container([
   view.todoSection([
     view.todoHeader([
@@ -14,14 +16,14 @@ module.exports = view.container([
     ]),
     view.mainSection([
       view.toggleCheckbox('Mark all as complete', oTodoData),
-      view.todoList(oTodoData)
+      view.todoList(oTodoData, oFragment)
     ]),
     view.todoFooter([
       view.todoItemsLeft(oTodoData),
       view.todoFilters([
-        view.link('#/', 'All'),
-        view.link('#/active', 'Active'),
-        view.link('#/completed', 'Completed')
+        view.link('#/', 'All', oFragment),
+        view.link('#/active', 'Active', oFragment),
+        view.link('#/completed', 'Completed', oFragment)
       ]),
       view.clearButton('Clear completed', oTodoData)
     ], oTodoData)
