@@ -41,6 +41,14 @@ var eq = assert.deepEqual;
   // Test state after changing the text.
   writeModeTodo.handlers.change({target: {value: 'bar'}});
   eq(todo.attributes.className.get(), '');
+
+  // Test that hitting escape reverts the value of the input element.
+  writeModeTodo.handlers.keyup({keyCode: 27, target: {value: 'foo'}});
+  eq(writeModeTodo.attributes.value.get(), 'bar');
+
+  // Test that a non-escape key has no effect.
+  writeModeTodo.handlers.keyup({keyCode: 42, target: {value: 'foo'}});
+
 })();
 
 // Test marking item as complete.

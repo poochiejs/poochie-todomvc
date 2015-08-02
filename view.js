@@ -5,6 +5,7 @@ var observable = require('poochie/observable');
 var model = require('./model');
 
 var ENTER_KEY = 13;
+var ESC_KEY = 27;
 
 function not(val) {
   return !val;
@@ -159,13 +160,20 @@ function writeModeTodoItem(attrs) {
     }
     attrs.readMode.set(true);
   }
+  function onKeyUp(evt) {
+    if (evt.keyCode === ESC_KEY) {
+      evt.target.value = attrs.text.get();
+      attrs.readMode.set(true);
+    }
+  }
   return dom.element({
     name: 'input',
     focus: attrs.readMode.map(not),
     attributes: {className: 'edit', value: attrs.text},
     handlers: {
       'change': onChange,
-      'blur': onChange
+      'blur': onChange,
+      'keyup': onKeyUp
     }
   });
 }
