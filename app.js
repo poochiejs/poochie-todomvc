@@ -266,36 +266,36 @@ model.autoSave(oTodoData);
 var oFragment = model.createObservableFragment();
 
 module.exports = view.container([
-  view.todoSection([
-    view.todoHeader([
-      view.h1('todos'),
-      view.newTodoItem('What needs to be done?', oTodoData)
-    ]),
-    view.mainSection([
-      view.toggleCheckbox('Mark all as complete', oTodoData),
-      view.todoList(oTodoData, oFragment)
-    ]),
-    view.todoFooter([
-      view.todoItemsLeft(oTodoData),
-      view.todoFilters([
-        view.link('#/', 'All', oFragment),
-        view.link('#/active', 'Active', oFragment),
-        view.link('#/completed', 'Completed', oFragment)
-      ]),
-      view.clearButton('Clear completed', oTodoData)
-    ], oTodoData)
-  ]),
-  view.infoFooter([
-    view.paragraph(['Double-click to edit a todo']),
-    view.paragraph([
-      'Created by ',
-      view.link('https://github.com/garious', 'Greg Fitzgerald')
-    ]),
-    view.paragraph([
-      'May one day be a part of ',
-      view.link('http://todomvc.com', 'TodoMVC')
-    ])
-  ])
+	view.todoSection([
+		view.todoHeader([
+			view.h1('todos'),
+			view.newTodoItem('What needs to be done?', oTodoData)
+		]),
+		view.mainSection([
+			view.toggleCheckbox('Mark all as complete', oTodoData),
+			view.todoList(oTodoData, oFragment)
+		]),
+		view.todoFooter([
+			view.todoItemsLeft(oTodoData),
+			view.todoFilters([
+				view.link('#/', 'All', oFragment),
+				view.link('#/active', 'Active', oFragment),
+				view.link('#/completed', 'Completed', oFragment)
+			]),
+			view.clearButton('Clear completed', oTodoData)
+		], oTodoData)
+	]),
+	view.infoFooter([
+		view.paragraph(['Double-click to edit a todo']),
+		view.paragraph([
+			'Created by ',
+			view.link('https://github.com/garious', 'Greg Fitzgerald')
+		]),
+		view.paragraph([
+			'May one day be a part of ',
+			view.link('http://todomvc.com', 'TodoMVC')
+		])
+	])
 ]);
 
 },{"./model":"/model.js","./view":"/view.js"}],"/model.js":[function(require,module,exports){
@@ -306,72 +306,72 @@ var observable = require('poochie/observable');
 var localStorage = require('localStorage');
 
 function createObservableFragment() {
-  var oFragment = observable.publisher('/');
+	var oFragment = observable.publisher('/');
 
-  function onHashChange() {
-    oFragment.set(global.location.hash.slice(1) || '/');
-  }
+	function onHashChange() {
+		oFragment.set(global.location.hash.slice(1) || '/');
+	}
 
-  if (global.window) {
-    global.window.onhashchange = onHashChange;
-    onHashChange();
-  }
+	if (global.window) {
+		global.window.onhashchange = onHashChange;
+		onHashChange();
+	}
 
-  return oFragment;
+	return oFragment;
 }
 
 function observeTodoItemData(data) {
-  return {
-    text: observable.publisher(data.text),
-    completed: observable.publisher(Boolean(data.completed))
-  };
+	return {
+		text: observable.publisher(data.text),
+		completed: observable.publisher(Boolean(data.completed))
+	};
 }
 
 function addItem(text, oTodoData) {
-  var data = oTodoData.get();
-  data.push(observeTodoItemData({text: text}));
-  oTodoData.set(data);
+	var data = oTodoData.get();
+	data.push(observeTodoItemData({text: text}));
+	oTodoData.set(data);
 }
 
 function removeItem(idx, oTodoData) {
-  var data = oTodoData.get();
-  data.splice(idx, 1);
-  oTodoData.set(data);
+	var data = oTodoData.get();
+	data.splice(idx, 1);
+	oTodoData.set(data);
 }
 
 function isObservableFalse(o) {
-  return !o.get();
+	return !o.get();
 }
 
 function isObservableTrue(o) {
-  return o.get();
+	return o.get();
 }
 
 // Return the value of the 'completed' field.
 function completedField(item) {
-  return item.completed;
+	return item.completed;
 }
 
 // Return the value of the 'text' field.
 function textField(item) {
-  return item.text;
+	return item.text;
 }
 
 // Return an array of only the value of the 'completed' field
 // from the input array.
 function textFields(data) {
-  return data.map(textField);
+	return data.map(textField);
 }
 
 // Return an array of only the value of the 'completed' field
 // from the input array.
 function completedFields(data) {
-  return data.map(completedField);
+	return data.map(completedField);
 }
 
 // Return an array of all observables in the todoList.
 function observableFields(data) {
-  return textFields(data).concat(completedFields(data));
+	return textFields(data).concat(completedFields(data));
 }
 
 // Return an observable array where each item is an observable
@@ -379,355 +379,392 @@ function observableFields(data) {
 // if an item is marked complete or if the number of items in the
 // list changes.
 function getIsCompletedFields(oItems) {
-  // An observable of observables.
-  var oCompletedFields = oItems.map(completedFields);
+	// An observable of observables.
+	var oCompletedFields = oItems.map(completedFields);
 
-  // Notified if any of item changes state, or if the total number of items
-  // changes.
-  return observable.subscriber(oCompletedFields, function() {
-    return oCompletedFields.get();
-  });
+	// Notified if any of item changes state, or if the total number of items
+	// changes.
+	return observable.subscriber(oCompletedFields, function() {
+		return oCompletedFields.get();
+	});
 }
 
 // Return the number of observable items that are currently false.
 function getFalseCount(items) {
-  return items.filter(isObservableFalse).length;
+	return items.filter(isObservableFalse).length;
 }
 
 // Return the number of observable items that are currently true.
 function getTrueCount(items) {
-  return items.filter(isObservableTrue).length;
+	return items.filter(isObservableTrue).length;
 }
 
 // Return an observable containing the number of items left.
 function oGetItemsLeftCount(oItems) {
-  return getIsCompletedFields(oItems).map(getFalseCount);
+	return getIsCompletedFields(oItems).map(getFalseCount);
 }
 
 // Return an observable containing the number of items completed.
 function oGetItemsCompletedCount(oItems) {
-  return getIsCompletedFields(oItems).map(getTrueCount);
+	return getIsCompletedFields(oItems).map(getTrueCount);
 }
 
 function save(oTodoList) {
-  var todoList = observable.snapshot(oTodoList);
-  var todoData = JSON.stringify(todoList);
-  localStorage.setItem('todoData', todoData);
+	var todoList = observable.snapshot(oTodoList);
+	var todoData = JSON.stringify(todoList);
+	localStorage.setItem('todoData', todoData);
 }
 
 function createObservableTodoData() {
-  var todoData = localStorage.getItem('todoData');
-  var todoList = JSON.parse(todoData) || [];
-  return observable.publisher(todoList.map(observeTodoItemData));
+	var todoData = localStorage.getItem('todoData');
+	var todoList = JSON.parse(todoData) || [];
+	return observable.publisher(todoList.map(observeTodoItemData));
 }
 
 function autoSave(oTodoList) {
-  var oFields = oTodoList.map(observableFields);
-  var oTodoFields = observable.subscriber(oFields, function() {
-    return oFields.get();
-  });
-  oTodoFields.invalidate = function() {
-    oTodoFields.get();
-    save(oTodoList);
-  };
+	var oFields = oTodoList.map(observableFields);
+	var oTodoFields = observable.subscriber(oFields, function() {
+		return oFields.get();
+	});
+	oTodoFields.invalidate = function() {
+		oTodoFields.get();
+		save(oTodoList);
+	};
 }
 
 module.exports = {
-  addItem: addItem,
-  autoSave: autoSave,
-  createObservableFragment: createObservableFragment,
-  createObservableTodoData: createObservableTodoData,
-  getIsCompletedFields: getIsCompletedFields,
-  oGetItemsLeftCount: oGetItemsLeftCount,
-  oGetItemsCompletedCount: oGetItemsCompletedCount,
-  removeItem: removeItem
+	addItem: addItem,
+	autoSave: autoSave,
+	createObservableFragment: createObservableFragment,
+	createObservableTodoData: createObservableTodoData,
+	getIsCompletedFields: getIsCompletedFields,
+	oGetItemsLeftCount: oGetItemsLeftCount,
+	oGetItemsCompletedCount: oGetItemsCompletedCount,
+	removeItem: removeItem
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"localStorage":2,"poochie/observable":4}],"/view.js":[function(require,module,exports){
+},{"localStorage":2,"poochie/observable":4}],"/prelude.js":[function(require,module,exports){
+'use strict';
+
+function not(val) {
+	return !val;
+}
+
+function len(xs) {
+	return xs.length;
+}
+
+function singleton(x) {
+	return [x];
+}
+
+module.exports = {
+	not: not,
+	len: len,
+	singleton: singleton
+};
+
+},{}],"/view.js":[function(require,module,exports){
 'use strict';
 
 var dom = require('poochie/dom');
 var observable = require('poochie/observable');
 var model = require('./model');
+var prelude = require('./prelude');
+var todoitem = require('./view_todoitem');
 
 var ENTER_KEY = 13;
-var ESC_KEY = 27;
-
-function not(val) {
-  return !val;
-}
-
-function len(xs) {
-  return xs.length;
-}
-
-function singleton(x) {
-  return [x];
-}
 
 function displayStyle(val) {
-  return val ? 'block' : 'none';
+	return val ? 'block' : 'none';
 }
 
 function container(contents, name, className) {
-  var params = {name: name || 'div', contents: contents};
-  if (className) {
-    params.attributes = {className: className};
-  }
-  return dom.element(params);
+	var params = {name: name || 'div', contents: contents};
+	if (className) {
+		params.attributes = {className: className};
+	}
+	return dom.element(params);
 }
 
 function link(href, text, oFragment) {
-  var oClass;
-  if (oFragment !== undefined) {
-    oClass = oFragment.map(function(fragment) {
-      return href === ('#' + fragment) ? 'selected' : '';
-    });
-  }
-  return dom.element({
-    name: 'a',
-    attributes: {className: oClass, href: href},
-    contents: [text]
-  });
+	var oClass;
+	if (oFragment !== undefined) {
+		oClass = oFragment.map(function(fragment) {
+			return href === ('#' + fragment) ? 'selected' : '';
+		});
+	}
+	return dom.element({
+		name: 'a',
+		attributes: {className: oClass, href: href},
+		contents: [text]
+	});
 }
 
 function toggleCheckbox(text, oTodoData) {
-  function onClick(evt) {
-    oTodoData.get().forEach(function(item) {
-      item.completed.set(Boolean(evt.target.checked));
-    });
-  }
+	function onClick(evt) {
+		oTodoData.get().forEach(function(item) {
+			item.completed.set(Boolean(evt.target.checked));
+		});
+	}
 
-  return dom.element({
-    name: 'input',
-    attributes: {
-      className: 'toggle-all',
-      type: 'checkbox',
-      checked: model.oGetItemsLeftCount(oTodoData).map(not)
-    },
-    style: {display: oTodoData.map(len).map(displayStyle)},
-    handlers: {
-      click: onClick
-    }
-  });
+	return dom.element({
+		name: 'input',
+		attributes: {
+			className: 'toggle-all',
+			type: 'checkbox',
+			checked: model.oGetItemsLeftCount(oTodoData).map(prelude.not)
+		},
+		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
+		handlers: {
+			click: onClick
+		}
+	});
 }
 
 function todoItemsLeftContents(itemsLeft) {
-  return [
-     dom.element({name: 'strong', contents: [String(itemsLeft)]}),
-     ' item' + (itemsLeft === 1 ? '' : 's') + ' left'
-  ];
+	return [
+		dom.element({name: 'strong', contents: [String(itemsLeft)]}),
+		' item' + (itemsLeft === 1 ? '' : 's') + ' left'
+	];
 }
 
 function oTodoItemsLeftContents(oItems) {
-  return model.oGetItemsLeftCount(oItems).map(todoItemsLeftContents);
+	return model.oGetItemsLeftCount(oItems).map(todoItemsLeftContents);
 }
 
 function todoItemsLeft(oTodoData) {
-  return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
+	return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
 }
 
 function newTodoItem(placeholderText, oTodoData) {
-  function onKeyUp(evt) {
-    var value = evt.target.value.trim();
-    if (evt.keyCode === ENTER_KEY && value) {
-      model.addItem(value, oTodoData);
-      evt.target.value = '';
-    }
-  }
-  return dom.element({
-    name: 'input',
-    attributes: {
-      className: 'new-todo',
-      placeholder: placeholderText,
-      autofocus: true
-    },
-    handlers: {
-      keyup: onKeyUp
-    }
-  });
-}
-
-function todoItemClass(completed, readMode) {
-  var classes = [];
-  if (completed) {
-    classes.push('completed');
-  }
-  if (!readMode) {
-    classes.push('editing');
-  }
-  return classes.join(' ');
-}
-
-function readModeTodoItem(attrs) {
-  return dom.element({
-    name: 'div',
-    attributes: {className: 'view'},
-    handlers: {
-      'dblclick': function onDblClick() { attrs.readMode.set(false); }
-    },
-    contents: [
-      dom.element({
-        name: 'input',
-        attributes: {
-          className: 'toggle',
-          type: 'checkbox',
-          checked: attrs.completed
-        },
-        handlers: {
-          click: function(evt) { attrs.completed.set(evt.target.checked); }
-        }
-      }),
-      dom.element({
-        name: 'label',
-        contents: attrs.text.map(singleton)
-      }),
-      dom.element({
-        name: 'button',
-        attributes: {className: 'destroy'},
-        handlers: {
-          'click': function() { model.removeItem(attrs.index, attrs.oTodoData); }
-        }
-      })
-    ]
-  });
-}
-
-function writeModeTodoItem(attrs) {
-  function onChange(evt) {
-    if (attrs.readMode.get()) {
-      return;
-    }
-    var value = evt.target.value.trim();
-    if (value === '') {
-      model.removeItem(attrs.index, attrs.oTodoData);
-    } else {
-      attrs.text.set(value);
-    }
-    attrs.readMode.set(true);
-  }
-  function onKeyUp(evt) {
-    if (evt.keyCode === ESC_KEY) {
-      evt.target.value = attrs.text.get();
-      attrs.readMode.set(true);
-    }
-  }
-  return dom.element({
-    name: 'input',
-    focus: attrs.readMode.map(not),
-    attributes: {className: 'edit', value: attrs.text},
-    handlers: {
-      'change': onChange,
-      'blur': onChange,
-      'keyup': onKeyUp
-    }
-  });
-}
-
-function todoItem(oTodoData, attrs, index) {
-  var itemAttrs = {
-    index: index,
-    oTodoData: oTodoData,
-    text: attrs.text,
-    completed: attrs.completed,
-    readMode: observable.publisher(true)
-  };
-
-  return dom.element({
-    name: 'li',
-    attributes: {
-      className: observable.subscriber([itemAttrs.completed, itemAttrs.readMode], todoItemClass)
-    },
-    contents: [
-      readModeTodoItem(itemAttrs),
-      writeModeTodoItem(itemAttrs)
-    ]
-  });
+	function onKeyUp(evt) {
+		var value = evt.target.value.trim();
+		if (evt.keyCode === ENTER_KEY && value) {
+			model.addItem(value, oTodoData);
+			evt.target.value = '';
+		}
+	}
+	return dom.element({
+		name: 'input',
+		attributes: {
+			className: 'new-todo',
+			placeholder: placeholderText,
+			autofocus: true
+		},
+		handlers: {
+			keyup: onKeyUp
+		}
+	});
 }
 
 function todoList(oTodoData, oFragment) {
-  function todoItems(todoData, fragment) {
-    if (fragment === '/active') {
-      todoData = todoData.filter(function(x){ return !x.completed.get(); });
-    } else if (fragment === '/completed') {
-      todoData = todoData.filter(function(x){ return x.completed.get(); });
-    }
-    return todoData.map(todoItem.bind(null, oTodoData));
-  }
-  var oIsCompletedFields = model.getIsCompletedFields(oTodoData);
-  var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
-  return container(oItems, 'ul', 'todo-list');
+	function todoItem(itemData, index) {
+		var handlers = {
+			remove: function() { model.removeItem(index, oTodoData); }
+                };
+		return todoitem.todoItem({attributes: itemData, handlers: handlers});
+	}
+
+	function todoItems(todoData, fragment) {
+		if (fragment === '/active') {
+			todoData = todoData.filter(function(x){ return !x.completed.get(); });
+		} else if (fragment === '/completed') {
+			todoData = todoData.filter(function(x){ return x.completed.get(); });
+		}
+		return todoData.map(todoItem);
+	}
+
+	var oIsCompletedFields = model.getIsCompletedFields(oTodoData);
+	var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
+	return container(oItems, 'ul', 'todo-list');
 }
 
 function listItem(xs) {
-  return container(xs, 'li');
+	return container(xs, 'li');
 }
 
 function clearButton(s, oTodoData) {
-  function onClick() {
-    // Iterate over the list backward and remove items
-    // by index when completed.
-    var todoData = oTodoData.get();
-    var item;
-    for (var i = todoData.length - 1; i >= 0; i--) {
-      item = todoData[i];
-      if (item.completed.get()) {
-        todoData.splice(i, 1);
-      }
-    }
-    oTodoData.set(todoData);
-  }
+	function onClick() {
+		// Iterate over the list backward and remove items
+		// by index when completed.
+		var todoData = oTodoData.get();
+		var item;
+		for (var i = todoData.length - 1; i >= 0; i--) {
+			item = todoData[i];
+			if (item.completed.get()) {
+				todoData.splice(i, 1);
+			}
+		}
+		oTodoData.set(todoData);
+	}
 
-  function visibleAttr(itemsComplete) {
-    return itemsComplete > 0 ? 'visible' : 'hidden';
-  }
+	function visibleAttr(itemsComplete) {
+		return itemsComplete > 0 ? 'visible' : 'hidden';
+	}
 
-  return dom.element({
-    name: 'button',
-    contents: [s],
-    attributes: {className: 'clear-completed'},
-    style: {
-      visibility: model.oGetItemsCompletedCount(oTodoData).map(visibleAttr)
-    },
-    handlers: {
-      click: onClick
-    }
-  });
+	return dom.element({
+		name: 'button',
+		contents: [s],
+		attributes: {className: 'clear-completed'},
+		style: {
+			visibility: model.oGetItemsCompletedCount(oTodoData).map(visibleAttr)
+		},
+		handlers: {
+			click: onClick
+		}
+	});
 }
 
 function todoFooter(xs, oTodoData) {
-  return dom.element({
-    name: 'footer',
-    attributes: {className: 'footer'},
-    style: {display: oTodoData.map(len).map(displayStyle)},
-    contents: xs
-  });
+	return dom.element({
+		name: 'footer',
+		attributes: {className: 'footer'},
+		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
+		contents: xs
+	});
 }
 
 module.exports = {
-  clearButton: clearButton,
-  container: container,
-  h1: function(s) { return container([s], 'h1'); },
-  infoFooter: function(xs) { return container(xs, 'footer', 'info'); },
-  link: link,
-  listItem: listItem,
-  mainSection: function(xs) { return container(xs, 'section', 'main'); },
-  newTodoItem: newTodoItem,
-  paragraph: function(xs) { return container(xs, 'p'); },
-  todoFilters: function(xs) { return container(xs.map(singleton).map(listItem), 'ul', 'filters'); },
-  todoFooter: todoFooter,
-  todoHeader: function(xs) { return container(xs, 'header', 'header'); },
-  todoItem: todoItem,
-  todoItemsLeft: todoItemsLeft,
-  todoList: todoList,
-  todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
-  toggleCheckbox: toggleCheckbox,
-  readModeTodoItem: readModeTodoItem,
-  writeModeTodoItem: writeModeTodoItem
+	clearButton: clearButton,
+	container: container,
+	h1: function(s) { return container([s], 'h1'); },
+	infoFooter: function(xs) { return container(xs, 'footer', 'info'); },
+	link: link,
+	listItem: listItem,
+	mainSection: function(xs) { return container(xs, 'section', 'main'); },
+	newTodoItem: newTodoItem,
+	paragraph: function(xs) { return container(xs, 'p'); },
+	todoFilters: function(xs) { return container(xs.map(prelude.singleton).map(listItem), 'ul', 'filters'); },
+	todoFooter: todoFooter,
+	todoHeader: function(xs) { return container(xs, 'header', 'header'); },
+	todoItemsLeft: todoItemsLeft,
+	todoList: todoList,
+	todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
+	toggleCheckbox: toggleCheckbox
 };
 
-},{"./model":"/model.js","poochie/dom":"poochie/dom","poochie/observable":4}],"poochie/dom":[function(require,module,exports){
+},{"./model":"/model.js","./prelude":"/prelude.js","./view_todoitem":"/view_todoitem.js","poochie/dom":"poochie/dom","poochie/observable":4}],"/view_todoitem.js":[function(require,module,exports){
+'use strict';
+
+var dom = require('poochie/dom');
+var observable = require('poochie/observable');
+var prelude = require('./prelude');
+
+var ESC_KEY = 27;
+
+function todoItemClass(completed, readMode) {
+	var classes = [];
+	if (completed) {
+		classes.push('completed');
+	}
+	if (!readMode) {
+		classes.push('editing');
+	}
+	return classes.join(' ');
+}
+
+function readModeTodoItem(attrs, handlers) {
+	return dom.element({
+		name: 'div',
+		attributes: {className: 'view'},
+		handlers: {
+			'dblclick': function onDblClick() { attrs.readMode.set(false); }
+		},
+		contents: [
+			dom.element({
+				name: 'input',
+				attributes: {
+					className: 'toggle',
+					type: 'checkbox',
+					checked: attrs.completed
+				},
+				handlers: {
+					click: function(evt) { attrs.completed.set(evt.target.checked); }
+				}
+			}),
+			dom.element({
+				name: 'label',
+				contents: attrs.text.map(prelude.singleton)
+			}),
+			dom.element({
+				name: 'button',
+				attributes: {className: 'destroy'},
+				handlers: {
+					'click': handlers.remove
+				}
+			})
+		]
+	});
+}
+
+function writeModeTodoItem(attrs, handlers) {
+	function onChange(evt) {
+		if (attrs.readMode.get()) {
+			return;
+		}
+		var value = evt.target.value.trim();
+		if (value === '') {
+			handlers.remove(evt);
+		} else {
+			attrs.text.set(value);
+		}
+		attrs.readMode.set(true);
+	}
+	function onKeyUp(evt) {
+		if (evt.keyCode === ESC_KEY) {
+			evt.target.value = attrs.text.get();
+			attrs.readMode.set(true);
+		}
+	}
+	return dom.element({
+		name: 'input',
+		focus: attrs.readMode.map(prelude.not),
+		attributes: {className: 'edit', value: attrs.text},
+		handlers: {
+			'change': onChange,
+			'blur': onChange,
+			'keyup': onKeyUp
+		}
+	});
+}
+
+function todoItemImpl(params) {
+	var attr = {
+		text: params.attributes.text,
+		completed: params.attributes.completed,
+		readMode: observable.publisher(true)
+	};
+
+	var handlers = {};
+	handlers.remove = params.handlers && params.handlers.remove || function() {};
+
+	return dom.element({
+		name: 'li',
+		attributes: {
+			className: observable.subscriber([attr.completed, attr.readMode], todoItemClass)
+		},
+		contents: [
+			readModeTodoItem(attr, handlers),
+			writeModeTodoItem(attr, handlers)
+		]
+	});
+}
+
+function todoItem(params) {
+	var e = {attributes: params.attributes, handlers: params.handlers};
+	e.render = function() { return todoItemImpl(e).render(); };
+	return e;
+}
+
+
+module.exports = {
+	todoItem: todoItem,
+	todoItemImpl: todoItemImpl
+};
+
+},{"./prelude":"/prelude.js","poochie/dom":"poochie/dom","poochie/observable":4}],"poochie/dom":[function(require,module,exports){
 //
 // Module name:
 //
