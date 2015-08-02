@@ -139,10 +139,12 @@ var eq = assert.deepEqual;
 
   // Ensure nothing happens if in read-mode.
   writeModeTodo.handlers.change({target: {value: ''}});
+  eq(writeModeTodo.focus.get(), false);
   eq(oTodoData.get().length, 1);
 
   // Enter write mode.
   readModeTodo.handlers.dblclick();
+  eq(writeModeTodo.focus.get(), true);
 
   // Ensure empty trimmed string causes item to be removed.
   writeModeTodo.handlers.change({target: {value: '   '}});

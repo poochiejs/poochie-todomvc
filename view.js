@@ -156,6 +156,7 @@ function writeModeTodoItem(attrs) {
   }
   return dom.element({
     name: 'input',
+    focus: attrs.readMode.map(not),
     attributes: {className: 'edit', value: attrs.text},
     handlers: {
       'change': onChange,
