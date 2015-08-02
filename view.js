@@ -96,7 +96,7 @@ function todoList(oTodoData, oFragment) {
 		var handlers = {
 			remove: function() { model.removeItem(index, oTodoData); }
                 };
-		return todoitem.todoItem(itemData, handlers);
+		return todoitem.todoItem({attributes: itemData, handlers: handlers});
 	}
 
 	function todoItems(todoData, fragment) {

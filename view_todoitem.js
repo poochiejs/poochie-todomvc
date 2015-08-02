@@ -82,24 +82,24 @@ function writeModeTodoItem(attrs, handlers) {
 	});
 }
 
-function todoItem(attrs, handlers) {
-	var itemAttrs = {
-		text: attrs.text,
-		completed: attrs.completed,
+function todoItem(params) {
+	var attr = {
+		text: params.attributes.text,
+		completed: params.attributes.completed,
 		readMode: observable.publisher(true)
 	};
 
-	var itemHandlers = {};
-	itemHandlers.remove = handlers && handlers.remove ? handlers.remove : function () {};
+	var handlers = {};
+	handlers.remove = params.handlers && params.handlers.remove || function() {};
 
 	return dom.element({
 		name: 'li',
 		attributes: {
-			className: observable.subscriber([itemAttrs.completed, itemAttrs.readMode], todoItemClass)
+			className: observable.subscriber([attr.completed, attr.readMode], todoItemClass)
 		},
 		contents: [
-			readModeTodoItem(itemAttrs, itemHandlers),
-			writeModeTodoItem(itemAttrs, itemHandlers)
+			readModeTodoItem(attr, handlers),
+			writeModeTodoItem(attr, handlers)
 		]
 	});
 }
