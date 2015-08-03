@@ -1,7 +1,7 @@
 'use strict';
 
-var view = require('./view_todoitem');
-var model = require('./model');
+var todoitem = require('./todoitem');
+var tododata = require('./tododata');
 var assert = require('assert');
 var observable = require('poochie/observable');
 var pub = observable.publisher;
@@ -9,7 +9,7 @@ var eq = assert.deepEqual;
 
 // Test double-clicking todo items.
 (function(){
-	var todo = view.todoItemImpl({
+	var todo = todoitem.todoItemImpl({
 		attributes: {text: pub('foo'), completed: pub(false)}
 	});
 	var readModeTodo = todo.contents[0];
@@ -42,7 +42,7 @@ var eq = assert.deepEqual;
 
 // Test marking item as complete.
 (function(){
-	var todo = view.todoItemImpl({
+	var todo = todoitem.todoItemImpl({
 		attributes: {text: pub('a'), completed: pub(false)}
 	});
 
@@ -61,12 +61,12 @@ var eq = assert.deepEqual;
 
 // Test todoItem className attribute.
 (function(){
-	var todo = view.todoItemImpl({
+	var todo = todoitem.todoItemImpl({
 		attributes: {text: pub('a'), completed: pub(false)}
 	});
 	eq(todo.attributes.className.get(), '');
 
-	var todo2 = view.todoItemImpl({
+	var todo2 = todoitem.todoItemImpl({
 		attributes: {text: pub('a'), completed: pub(true)}
 	});
 	eq(todo2.attributes.className.get(), 'completed');
@@ -75,9 +75,9 @@ var eq = assert.deepEqual;
 // Test removeItem.
 (function(){
 	var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-	var todo = view.todoItemImpl({
+	var todo = todoitem.todoItemImpl({
 		attributes: oTodoData.get()[0],
-		handlers: {remove: function() { model.removeItem(0, oTodoData); }}
+		handlers: {remove: function() { tododata.removeItem(0, oTodoData); }}
 	});
 	var readModeTodo = todo.contents[0];
 	var destroyButton = readModeTodo.contents[2];
@@ -91,9 +91,9 @@ var eq = assert.deepEqual;
 // Test removeItem by editing.
 (function(){
 	var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-	var todo = view.todoItemImpl({
+	var todo = todoitem.todoItemImpl({
 		attributes: oTodoData.get()[0],
-		handlers: {remove: function() { model.removeItem(0, oTodoData); }}
+		handlers: {remove: function() { tododata.removeItem(0, oTodoData); }}
 	});
 	var readModeTodo = todo.contents[0];
 	var writeModeTodo = todo.contents[1];
@@ -114,7 +114,7 @@ var eq = assert.deepEqual;
 
 // Test that render returns somethine renderable.
 (function(){
-	var todo = view.todoItem({
+	var todo = todoitem.todoItem({
 		attributes: {text: pub('a'), completed: pub(false)}
 	});
 	eq(typeof todo.render().render, 'function');

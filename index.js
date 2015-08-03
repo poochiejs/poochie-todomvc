@@ -1,42 +1,42 @@
 'use strict';
 
-var model = require('./model');
-var view = require('./view');
+var tododata = require('./tododata');
+var gizmos = require('./gizmos');
 
-var oTodoData = model.createObservableTodoData();
-model.autoSave(oTodoData);
+var oTodoData = tododata.createObservableTodoData();
+tododata.autoSave(oTodoData);
 
-var oFragment = model.createObservableFragment();
+var oFragment = tododata.createObservableFragment();
 
-module.exports = view.container([
-	view.todoSection([
-		view.todoHeader([
-			view.h1('todos'),
-			view.newTodoItem('What needs to be done?', oTodoData)
+module.exports = gizmos.container([
+	gizmos.todoSection([
+		gizmos.todoHeader([
+			gizmos.h1('todos'),
+			gizmos.newTodoItem('What needs to be done?', oTodoData)
 		]),
-		view.mainSection([
-			view.toggleCheckbox('Mark all as complete', oTodoData),
-			view.todoList(oTodoData, oFragment)
+		gizmos.mainSection([
+			gizmos.toggleAllCheckbox('Mark all as complete', oTodoData),
+			gizmos.todoList(oTodoData, oFragment)
 		]),
-		view.todoFooter([
-			view.todoItemsLeft(oTodoData),
-			view.todoFilters([
-				view.link('#/', 'All', oFragment),
-				view.link('#/active', 'Active', oFragment),
-				view.link('#/completed', 'Completed', oFragment)
+		gizmos.todoFooter([
+			gizmos.todoItemsLeft(oTodoData),
+			gizmos.todoFilters([
+				gizmos.link('#/', 'All', oFragment),
+				gizmos.link('#/active', 'Active', oFragment),
+				gizmos.link('#/completed', 'Completed', oFragment)
 			]),
-			view.clearButton('Clear completed', oTodoData)
+			gizmos.clearButton('Clear completed', oTodoData)
 		], oTodoData)
 	]),
-	view.infoFooter([
-		view.paragraph(['Double-click to edit a todo']),
-		view.paragraph([
+	gizmos.infoFooter([
+		gizmos.paragraph(['Double-click to edit a todo']),
+		gizmos.paragraph([
 			'Created by ',
-			view.link('https://github.com/garious', 'Greg Fitzgerald')
+			gizmos.link('https://github.com/garious', 'Greg Fitzgerald')
 		]),
-		view.paragraph([
+		gizmos.paragraph([
 			'May one day be a part of ',
-			view.link('http://todomvc.com', 'TodoMVC')
+			gizmos.link('http://todomvc.com', 'TodoMVC')
 		])
 	])
 ]);

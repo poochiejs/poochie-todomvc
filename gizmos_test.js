@@ -1,6 +1,6 @@
 'use strict';
 
-var view = require('./view');
+var gizmos = require('./gizmos');
 var assert = require('assert');
 var observable = require('poochie/observable');
 var pub = observable.publisher;
@@ -9,7 +9,7 @@ var eq = assert.deepEqual;
 // Test link event handlers.
 (function(){
 	var oFragment = pub('foo');
-	var link = view.link('#a.b.c', 'A', oFragment);
+	var link = gizmos.link('#a.b.c', 'A', oFragment);
 	eq(link.attributes.className.get(), '');
 
 	oFragment.set('a.b.c');
@@ -23,7 +23,7 @@ var eq = assert.deepEqual;
 (function(){
 	var oTodoData = pub([]);
 	var oFragment = pub('/');
-	var todoList = view.todoList(oTodoData, oFragment);
+	var todoList = gizmos.todoList(oTodoData, oFragment);
 	oTodoData.set([{text: pub('a'), completed: pub(false)}]);
 
 	// Test 1 item in all.
@@ -51,7 +51,7 @@ var eq = assert.deepEqual;
 // Test todoItemsLeft.
 (function(){
 	function itemsLeft(oItems) {
-		var span = view.todoItemsLeft(oItems);
+		var span = gizmos.todoItemsLeft(oItems);
 		var cnts = span.contents.get();
 		return cnts[0].contents[0] + cnts[1];
 	}
@@ -66,7 +66,7 @@ var eq = assert.deepEqual;
 // Test newTodoItem.
 (function(){
 	var oTodoData = pub([]);
-	var item = view.newTodoItem('baz', oTodoData);
+	var item = gizmos.newTodoItem('baz', oTodoData);
 
 	// Verify the handler is not called.
 	item.handlers.keyup({keyCode: 10, target: {value: 'bar'}});
@@ -88,7 +88,7 @@ var eq = assert.deepEqual;
 // Test marking all items complete.
 (function(){
 	var oTodoData = pub([{text: pub('a'), completed: pub(false)}]);
-	var checkbox = view.toggleCheckbox('foo', oTodoData);
+	var checkbox = gizmos.toggleAllCheckbox('foo', oTodoData);
 
 	// Test checkbox is displayed when more than one item is in the todo list.
 	eq(checkbox.style.display.get(), 'block');
@@ -105,7 +105,7 @@ var eq = assert.deepEqual;
 	checkbox.handlers.click({target: {}});
 	eq(oTodoData.get()[0].completed.get(), false);
 
-	// Test that checking all items causes the toggleCheckbox to be checked.
+	// Test that checking all items causes the toggleAllCheckbox to be checked.
 	oTodoData.get()[0].completed.set(true);
 	eq(checkbox.attributes.checked.get(), true);
 
@@ -118,7 +118,7 @@ var eq = assert.deepEqual;
 		{text: pub('b'), completed: pub(false)},
 		{text: pub('c'), completed: pub(true)}
 	]);
-	var button = view.clearButton('foo', oTodoData);
+	var button = gizmos.clearButton('foo', oTodoData);
 	eq(button.style.visibility.get(), 'visible');
 
 	button.handlers.click();
@@ -128,7 +128,7 @@ var eq = assert.deepEqual;
 
 // Test footer is not visible if there are no todo items.
 (function(){
-	var footer = view.todoFooter([], pub([]));
+	var footer = gizmos.todoFooter([], pub([]));
 	eq(footer.style.display.get(), 'none');
 })();
 

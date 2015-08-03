@@ -1,6 +1,6 @@
 'use strict';
 
-var model = require('./model');
+var tododata = require('./tododata');
 var observable = require('poochie/observable');
 var assert = require('assert');
 var localStorage = require('localStorage');
@@ -8,22 +8,22 @@ var pub = observable.publisher;
 var eq = assert.deepEqual;
 
 (function testTodoData(){
-	eq(model.createObservableTodoData().get() instanceof Array, true);
+	eq(tododata.createObservableTodoData().get() instanceof Array, true);
 })();
 
 (function testAddItem(){
 	var oTodoData = pub([]);
-	model.addItem('do stuff', oTodoData);
+	tododata.addItem('do stuff', oTodoData);
 	eq(oTodoData.get().length, 1);
 })();
 
 (function testRemoveItem(){
 	var oTodoData = pub([{text: 'foo'}, {text: 'bar'}]);
 
-	model.removeItem(0, oTodoData);
+	tododata.removeItem(0, oTodoData);
 	eq(oTodoData.get().length, 1);
 
-	model.removeItem(0, oTodoData);
+	tododata.removeItem(0, oTodoData);
 	eq(oTodoData.get().length, 0);
 })();
 
@@ -36,7 +36,7 @@ var eq = assert.deepEqual;
 	localStorage.clear();
 	localStorage.setItem('todoData', JSON.stringify(rawTodoData));
 
-	var oTodoData = model.createObservableTodoData();
+	var oTodoData = tododata.createObservableTodoData();
 	eq(oTodoData.get()[1].text.get(), 'Buy a unicorn');
 })();
 
@@ -52,8 +52,8 @@ var eq = assert.deepEqual;
 
 	localStorage.clear();
 	localStorage.setItem('todoData', JSON.stringify(rawTodoData));
-	var oTodoData = model.createObservableTodoData();
-	model.autoSave(oTodoData);
+	var oTodoData = tododata.createObservableTodoData();
+	tododata.autoSave(oTodoData);
 
 	// Modify completed state. Ensure it was saved.
 	eq(load()[0].completed, true);
@@ -72,7 +72,7 @@ var eq = assert.deepEqual;
 })();
 
 (function testFragment(){
-	model.createObservableFragment();
+	tododata.createObservableFragment();
 })();
 
 (function testFragmentWithWindow(){
@@ -80,11 +80,11 @@ var eq = assert.deepEqual;
 
 	// Test empty URL.
 	global.location = {hash: ''};
-	model.createObservableFragment();
+	tododata.createObservableFragment();
 
 	// Test URL with a fragment.
 	global.location = {hash: '#/'};
-	model.createObservableFragment();
+	tododata.createObservableFragment();
 
 	delete global.location;
 	delete global.window;
