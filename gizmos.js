@@ -1,10 +1,8 @@
 'use strict';
 
 var dom = require('poochie/dom');
-var observable = require('poochie/observable');
 var tododata = require('./tododata');
 var prelude = require('./prelude');
-var todoitem = require('./todoitem');
 
 var ENTER_KEY = 13;
 
@@ -91,28 +89,6 @@ function newTodoItem(placeholderText, oTodoData) {
 	});
 }
 
-function todoList(oTodoData, oFragment) {
-	function todoItem(itemData, index) {
-		var handlers = {
-			remove: function() { tododata.removeItem(index, oTodoData); }
-                };
-		return todoitem.todoItem({attributes: itemData, handlers: handlers});
-	}
-
-	function todoItems(todoData, fragment) {
-		if (fragment === '/active') {
-			todoData = todoData.filter(function(x){ return !x.completed.get(); });
-		} else if (fragment === '/completed') {
-			todoData = todoData.filter(function(x){ return x.completed.get(); });
-		}
-		return todoData.map(todoItem);
-	}
-
-	var oIsCompletedFields = tododata.getIsCompletedFields(oTodoData);
-	var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
-	return container(oItems, 'ul', 'todo-list');
-}
-
 function listItem(xs) {
 	return container(xs, 'li');
 }
@@ -177,7 +153,6 @@ module.exports = {
 	todoFooter: todoFooter,
 	todoHeader: function(xs) { return container(xs, 'header', 'header'); },
 	todoItemsLeft: todoItemsLeft,
-	todoList: todoList,
 	todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
 	toggleAllCheckbox: toggleAllCheckbox
 };

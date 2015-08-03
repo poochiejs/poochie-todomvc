@@ -1,6 +1,7 @@
 'use strict';
 
 var tododata = require('./tododata');
+var todolist = require('./todolist');
 var gizmos = require('./gizmos');
 
 var oTodoData = tododata.createObservableTodoData();
@@ -16,7 +17,7 @@ module.exports = gizmos.container([
 		]),
 		gizmos.mainSection([
 			gizmos.toggleAllCheckbox('Mark all as complete', oTodoData),
-			gizmos.todoList(oTodoData, oFragment)
+			todolist.todoList(oTodoData, oFragment)
 		]),
 		gizmos.todoFooter([
 			gizmos.todoItemsLeft(oTodoData),
