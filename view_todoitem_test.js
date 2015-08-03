@@ -112,5 +112,13 @@ var eq = assert.deepEqual;
 	eq(oTodoData.get().length, 0);
 })();
 
+// Test that render returns somethine renderable.
+(function(){
+	var todo = view.todoItem({
+		attributes: {text: pub('a'), completed: pub(false)}
+	});
+	eq(typeof todo.render().render, 'function');
+})();
+
 module.exports = 'passed!';
 

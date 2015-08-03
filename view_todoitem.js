@@ -106,7 +106,7 @@ function todoItemImpl(params) {
 
 function todoItem(params) {
 	var e = {attributes: params.attributes, handlers: params.handlers};
-	e.render = function() { return todoItemImpl(e).render(); };
+	e.render = function() { return todoItemImpl(e); };
 	return e;
 }
 
