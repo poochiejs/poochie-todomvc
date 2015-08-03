@@ -1,14 +1,6 @@
 'use strict';
 
 var dom = require('poochie/dom');
-var tododata = require('./tododata');
-var prelude = require('./prelude');
-
-var ENTER_KEY = 13;
-
-function displayStyle(val) {
-	return val ? 'block' : 'none';
-}
 
 function container(contents, name, className) {
 	var params = {name: name || 'div', contents: contents};
@@ -32,127 +24,14 @@ function link(href, text, oFragment) {
 	});
 }
 
-function toggleAllCheckbox(text, oTodoData) {
-	function onClick(evt) {
-		oTodoData.get().forEach(function(item) {
-			item.completed.set(Boolean(evt.target.checked));
-		});
-	}
-
-	return dom.element({
-		name: 'input',
-		attributes: {
-			className: 'toggle-all',
-			type: 'checkbox',
-			checked: tododata.oGetItemsLeftCount(oTodoData).map(prelude.not)
-		},
-		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
-		handlers: {
-			click: onClick
-		}
-	});
-}
-
-function todoItemsLeftContents(itemsLeft) {
-	return [
-		dom.element({name: 'strong', contents: [String(itemsLeft)]}),
-		' item' + (itemsLeft === 1 ? '' : 's') + ' left'
-	];
-}
-
-function oTodoItemsLeftContents(oItems) {
-	return tododata.oGetItemsLeftCount(oItems).map(todoItemsLeftContents);
-}
-
-function todoItemsLeft(oTodoData) {
-	return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
-}
-
-function newTodoItem(placeholderText, oTodoData) {
-	function onKeyUp(evt) {
-		var value = evt.target.value.trim();
-		if (evt.keyCode === ENTER_KEY && value) {
-			tododata.addItem(value, oTodoData);
-			evt.target.value = '';
-		}
-	}
-	return dom.element({
-		name: 'input',
-		attributes: {
-			className: 'new-todo',
-			placeholder: placeholderText,
-			autofocus: true
-		},
-		handlers: {
-			keyup: onKeyUp
-		}
-	});
-}
-
 function listItem(xs) {
 	return container(xs, 'li');
 }
 
-function clearButton(s, oTodoData) {
-	function onClick() {
-		// Iterate over the list backward and remove items
-		// by index when completed.
-		var todoData = oTodoData.get();
-		var item;
-		for (var i = todoData.length - 1; i >= 0; i--) {
-			item = todoData[i];
-			if (item.completed.get()) {
-				todoData.splice(i, 1);
-			}
-		}
-		oTodoData.set(todoData);
-	}
-
-	function visibleAttr(itemsComplete) {
-		return itemsComplete > 0 ? 'visible' : 'hidden';
-	}
-
-	return dom.element({
-		name: 'button',
-		contents: [s],
-		attributes: {className: 'clear-completed'},
-		style: {
-			visibility: tododata.oGetItemsCompletedCount(oTodoData).map(visibleAttr)
-		},
-		handlers: {
-			click: onClick
-		}
-	});
-}
-
-function todoFooter(xs, oTodoData) {
-	return dom.element({
-		name: 'footer',
-		attributes: {className: 'footer'},
-		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
-		contents: xs
-	});
-}
-
-function todoFilters(xs) {
-	var contents = xs.map(prelude.singleton).map(listItem);
-	return container(contents, 'ul', 'filters');
-}
-
 module.exports = {
-	clearButton: clearButton,
 	container: container,
 	h1: function(s) { return container([s], 'h1'); },
-	infoFooter: function(xs) { return container(xs, 'footer', 'info'); },
 	link: link,
 	listItem: listItem,
-	mainSection: function(xs) { return container(xs, 'section', 'main'); },
-	newTodoItem: newTodoItem,
-	paragraph: function(xs) { return container(xs, 'p'); },
-	todoFilters: todoFilters,
-	todoFooter: todoFooter,
-	todoHeader: function(xs) { return container(xs, 'header', 'header'); },
-	todoItemsLeft: todoItemsLeft,
-	todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
-	toggleAllCheckbox: toggleAllCheckbox
+	paragraph: function(xs) { return container(xs, 'p'); }
 };

@@ -2,6 +2,7 @@
 
 var tododata = require('./tododata');
 var todolist = require('./todolist');
+var todomisc = require('./todomisc');
 var gizmos = require('./gizmos');
 
 var oTodoData = tododata.createObservableTodoData();
@@ -10,26 +11,26 @@ tododata.autoSave(oTodoData);
 var oFragment = tododata.createObservableFragment();
 
 module.exports = gizmos.container([
-	gizmos.todoSection([
-		gizmos.todoHeader([
+	todomisc.todoApp([
+		todomisc.header([
 			gizmos.h1('todos'),
-			gizmos.newTodoItem('What needs to be done?', oTodoData)
+			todomisc.newTodoItem('What needs to be done?', oTodoData)
 		]),
-		gizmos.mainSection([
-			gizmos.toggleAllCheckbox('Mark all as complete', oTodoData),
+		todomisc.mainSection([
+			todomisc.toggleAllCheckbox('Mark all as complete', oTodoData),
 			todolist.todoList(oTodoData, oFragment)
 		]),
-		gizmos.todoFooter([
-			gizmos.todoItemsLeft(oTodoData),
-			gizmos.todoFilters([
+		todomisc.footer([
+			todomisc.todoItemsLeft(oTodoData),
+			todomisc.filters([
 				gizmos.link('#/', 'All', oFragment),
 				gizmos.link('#/active', 'Active', oFragment),
 				gizmos.link('#/completed', 'Completed', oFragment)
 			]),
-			gizmos.clearButton('Clear completed', oTodoData)
+			todomisc.clearCompletedButton('Clear completed', oTodoData)
 		], oTodoData)
 	]),
-	gizmos.infoFooter([
+	todomisc.infoFooter([
 		gizmos.paragraph(['Double-click to edit a todo']),
 		gizmos.paragraph([
 			'Created by ',
