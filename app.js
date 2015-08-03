@@ -505,12 +505,12 @@ function todoItemClass(completed, readMode) {
 	return classes.join(' ');
 }
 
-function readModeTodoItem(attrs, handlers) {
+function readModeTodoItem(params) {
 	return dom.element({
 		name: 'div',
 		attributes: {className: 'view'},
 		handlers: {
-			'dblclick': function onDblClick() { attrs.readMode.set(false); }
+			'dblclick': function onDblClick() { params.readMode.set(false); }
 		},
 		contents: [
 			dom.element({
@@ -518,50 +518,50 @@ function readModeTodoItem(attrs, handlers) {
 				attributes: {
 					className: 'toggle',
 					type: 'checkbox',
-					checked: attrs.completed
+					checked: params.completed
 				},
 				handlers: {
-					click: function(evt) { attrs.completed.set(evt.target.checked); }
+					click: function(evt) { params.completed.set(evt.target.checked); }
 				}
 			}),
 			dom.element({
 				name: 'label',
-				contents: attrs.text.map(prelude.singleton)
+				contents: params.text.map(prelude.singleton)
 			}),
 			dom.element({
 				name: 'button',
 				attributes: {className: 'destroy'},
 				handlers: {
-					'click': handlers.remove
+					'click': params.handlers.remove
 				}
 			})
 		]
 	});
 }
 
-function writeModeTodoItem(attrs, handlers) {
+function writeModeTodoItem(params) {
 	function onChange(evt) {
-		if (attrs.readMode.get()) {
+		if (params.readMode.get()) {
 			return;
 		}
 		var value = evt.target.value.trim();
 		if (value === '') {
-			handlers.remove(evt);
+			params.handlers.remove(evt);
 		} else {
-			attrs.text.set(value);
+			params.text.set(value);
 		}
-		attrs.readMode.set(true);
+		params.readMode.set(true);
 	}
 	function onKeyUp(evt) {
 		if (evt.keyCode === ESC_KEY) {
-			evt.target.value = attrs.text.get();
-			attrs.readMode.set(true);
+			evt.target.value = params.text.get();
+			params.readMode.set(true);
 		}
 	}
 	return dom.element({
 		name: 'input',
-		focus: attrs.readMode.map(prelude.not),
-		attributes: {className: 'edit', value: attrs.text},
+		focus: params.readMode.map(prelude.not),
+		attributes: {className: 'edit', value: params.text},
 		handlers: {
 			'change': onChange,
 			'blur': onChange,
@@ -571,29 +571,30 @@ function writeModeTodoItem(attrs, handlers) {
 }
 
 function todoItemImpl(params) {
-	var attr = {
-		text: params.attributes.text,
-		completed: params.attributes.completed,
-		readMode: observable.publisher(true)
-	};
-
 	var handlers = {};
 	handlers.remove = params.handlers && params.handlers.remove || function() {};
+
+	var ps = {
+		text: params.text,
+		completed: params.completed,
+		readMode: observable.publisher(true),
+                handlers: handlers
+	};
 
 	return dom.element({
 		name: 'li',
 		attributes: {
-			className: observable.subscriber([attr.completed, attr.readMode], todoItemClass)
+			className: observable.subscriber([ps.completed, ps.readMode], todoItemClass)
 		},
 		contents: [
-			readModeTodoItem(attr, handlers),
-			writeModeTodoItem(attr, handlers)
+			readModeTodoItem(ps),
+			writeModeTodoItem(ps)
 		]
 	});
 }
 
 function todoItem(params) {
-	var e = {attributes: params.attributes, handlers: params.handlers};
+	var e = {text: params.text, completed: params.completed, handlers: params.handlers};
 	e.render = function() { return todoItemImpl(e); };
 	return e;
 }
@@ -617,7 +618,12 @@ function todoList(oTodoData, oFragment) {
 		var handlers = {
 			remove: function() { tododata.removeItem(index, oTodoData); }
                 };
-		return todoitem.todoItem({attributes: itemData, handlers: handlers});
+
+		return todoitem.todoItem({
+			text: itemData.text,
+			completed: itemData.completed,
+			handlers: handlers
+		});
 	}
 
 	function todoItems(todoData, fragment) {
