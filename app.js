@@ -1,6 +1,4 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-
-},{}],2:[function(require,module,exports){
 (function (global){
 // http://www.rajdeepd.com/articles/chrome/localstrg/LocalStorageSample.htm
 
@@ -58,26 +56,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
-(function (global){
-var topLevel = typeof global !== 'undefined' ? global :
-    typeof window !== 'undefined' ? window : {}
-var minDoc = require('min-document');
-
-if (typeof document !== 'undefined') {
-    module.exports = document;
-} else {
-    var doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
-
-    if (!doccy) {
-        doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
-    }
-
-    module.exports = doccy;
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":1}],4:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 //
 // Observable JS
 //
@@ -254,51 +233,113 @@ module.exports = {
     snapshot: snapshot
 };
 
-},{}],"/index.js":[function(require,module,exports){
+},{}],"/gizmos.js":[function(require,module,exports){
 'use strict';
 
-var model = require('./model');
-var view = require('./view');
+var dom = require('poochie/dom');
 
-var oTodoData = model.createObservableTodoData();
-model.autoSave(oTodoData);
+function container(contents, name, className) {
+	var params = {name: name || 'div', contents: contents};
+	if (className) {
+		params.attributes = {className: className};
+	}
+	return dom.element(params);
+}
 
-var oFragment = model.createObservableFragment();
+function link(href, text, oFragment) {
+	var oClass;
+	if (oFragment !== undefined) {
+		oClass = oFragment.map(function(fragment) {
+			return href === ('#' + fragment) ? 'selected' : '';
+		});
+	}
+	return dom.element({
+		name: 'a',
+		attributes: {className: oClass, href: href},
+		contents: [text]
+	});
+}
 
-module.exports = view.container([
-	view.todoSection([
-		view.todoHeader([
-			view.h1('todos'),
-			view.newTodoItem('What needs to be done?', oTodoData)
+function listItem(xs) {
+	return container(xs, 'li');
+}
+
+module.exports = {
+	container: container,
+	h1: function(s) { return container([s], 'h1'); },
+	link: link,
+	listItem: listItem,
+	paragraph: function(xs) { return container(xs, 'p'); }
+};
+
+},{"poochie/dom":"poochie/dom"}],"/index.js":[function(require,module,exports){
+'use strict';
+
+var tododata = require('./tododata');
+var todolist = require('./todolist');
+var todomisc = require('./todomisc');
+var gizmos = require('./gizmos');
+
+var oTodoData = tododata.createObservableTodoData();
+tododata.autoSave(oTodoData);
+
+var oFragment = tododata.createObservableFragment();
+
+module.exports = gizmos.container([
+	todomisc.todoApp([
+		todomisc.header([
+			gizmos.h1('todos'),
+			todomisc.newTodoItem('What needs to be done?', oTodoData)
 		]),
-		view.mainSection([
-			view.toggleCheckbox('Mark all as complete', oTodoData),
-			view.todoList(oTodoData, oFragment)
+		todomisc.mainSection([
+			todomisc.toggleAllCheckbox('Mark all as complete', oTodoData),
+			todolist.todoList(oTodoData, oFragment)
 		]),
-		view.todoFooter([
-			view.todoItemsLeft(oTodoData),
-			view.todoFilters([
-				view.link('#/', 'All', oFragment),
-				view.link('#/active', 'Active', oFragment),
-				view.link('#/completed', 'Completed', oFragment)
+		todomisc.footer([
+			todomisc.todoItemsLeft(oTodoData),
+			todomisc.filters([
+				gizmos.link('#/', 'All', oFragment),
+				gizmos.link('#/active', 'Active', oFragment),
+				gizmos.link('#/completed', 'Completed', oFragment)
 			]),
-			view.clearButton('Clear completed', oTodoData)
+			todomisc.clearCompletedButton('Clear completed', oTodoData)
 		], oTodoData)
 	]),
-	view.infoFooter([
-		view.paragraph(['Double-click to edit a todo']),
-		view.paragraph([
+	todomisc.infoFooter([
+		gizmos.paragraph(['Double-click to edit a todo']),
+		gizmos.paragraph([
 			'Created by ',
-			view.link('https://github.com/garious', 'Greg Fitzgerald')
+			gizmos.link('https://github.com/garious', 'Greg Fitzgerald')
 		]),
-		view.paragraph([
+		gizmos.paragraph([
 			'May one day be a part of ',
-			view.link('http://todomvc.com', 'TodoMVC')
+			gizmos.link('http://todomvc.com', 'TodoMVC')
 		])
 	])
 ]);
 
-},{"./model":"/model.js","./view":"/view.js"}],"/model.js":[function(require,module,exports){
+},{"./gizmos":"/gizmos.js","./tododata":"/tododata.js","./todolist":"/todolist.js","./todomisc":"/todomisc.js"}],"/prelude.js":[function(require,module,exports){
+'use strict';
+
+function not(val) {
+	return !val;
+}
+
+function len(xs) {
+	return xs.length;
+}
+
+function singleton(x) {
+	return [x];
+}
+
+module.exports = {
+	not: not,
+	len: len,
+	singleton: singleton
+};
+
+},{}],"/tododata.js":[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -444,208 +485,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"localStorage":2,"poochie/observable":4}],"/prelude.js":[function(require,module,exports){
-'use strict';
-
-function not(val) {
-	return !val;
-}
-
-function len(xs) {
-	return xs.length;
-}
-
-function singleton(x) {
-	return [x];
-}
-
-module.exports = {
-	not: not,
-	len: len,
-	singleton: singleton
-};
-
-},{}],"/view.js":[function(require,module,exports){
-'use strict';
-
-var dom = require('poochie/dom');
-var observable = require('poochie/observable');
-var model = require('./model');
-var prelude = require('./prelude');
-var todoitem = require('./view_todoitem');
-
-var ENTER_KEY = 13;
-
-function displayStyle(val) {
-	return val ? 'block' : 'none';
-}
-
-function container(contents, name, className) {
-	var params = {name: name || 'div', contents: contents};
-	if (className) {
-		params.attributes = {className: className};
-	}
-	return dom.element(params);
-}
-
-function link(href, text, oFragment) {
-	var oClass;
-	if (oFragment !== undefined) {
-		oClass = oFragment.map(function(fragment) {
-			return href === ('#' + fragment) ? 'selected' : '';
-		});
-	}
-	return dom.element({
-		name: 'a',
-		attributes: {className: oClass, href: href},
-		contents: [text]
-	});
-}
-
-function toggleCheckbox(text, oTodoData) {
-	function onClick(evt) {
-		oTodoData.get().forEach(function(item) {
-			item.completed.set(Boolean(evt.target.checked));
-		});
-	}
-
-	return dom.element({
-		name: 'input',
-		attributes: {
-			className: 'toggle-all',
-			type: 'checkbox',
-			checked: model.oGetItemsLeftCount(oTodoData).map(prelude.not)
-		},
-		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
-		handlers: {
-			click: onClick
-		}
-	});
-}
-
-function todoItemsLeftContents(itemsLeft) {
-	return [
-		dom.element({name: 'strong', contents: [String(itemsLeft)]}),
-		' item' + (itemsLeft === 1 ? '' : 's') + ' left'
-	];
-}
-
-function oTodoItemsLeftContents(oItems) {
-	return model.oGetItemsLeftCount(oItems).map(todoItemsLeftContents);
-}
-
-function todoItemsLeft(oTodoData) {
-	return container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
-}
-
-function newTodoItem(placeholderText, oTodoData) {
-	function onKeyUp(evt) {
-		var value = evt.target.value.trim();
-		if (evt.keyCode === ENTER_KEY && value) {
-			model.addItem(value, oTodoData);
-			evt.target.value = '';
-		}
-	}
-	return dom.element({
-		name: 'input',
-		attributes: {
-			className: 'new-todo',
-			placeholder: placeholderText,
-			autofocus: true
-		},
-		handlers: {
-			keyup: onKeyUp
-		}
-	});
-}
-
-function todoList(oTodoData, oFragment) {
-	function todoItem(itemData, index) {
-		var handlers = {
-			remove: function() { model.removeItem(index, oTodoData); }
-                };
-		return todoitem.todoItem({attributes: itemData, handlers: handlers});
-	}
-
-	function todoItems(todoData, fragment) {
-		if (fragment === '/active') {
-			todoData = todoData.filter(function(x){ return !x.completed.get(); });
-		} else if (fragment === '/completed') {
-			todoData = todoData.filter(function(x){ return x.completed.get(); });
-		}
-		return todoData.map(todoItem);
-	}
-
-	var oIsCompletedFields = model.getIsCompletedFields(oTodoData);
-	var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
-	return container(oItems, 'ul', 'todo-list');
-}
-
-function listItem(xs) {
-	return container(xs, 'li');
-}
-
-function clearButton(s, oTodoData) {
-	function onClick() {
-		// Iterate over the list backward and remove items
-		// by index when completed.
-		var todoData = oTodoData.get();
-		var item;
-		for (var i = todoData.length - 1; i >= 0; i--) {
-			item = todoData[i];
-			if (item.completed.get()) {
-				todoData.splice(i, 1);
-			}
-		}
-		oTodoData.set(todoData);
-	}
-
-	function visibleAttr(itemsComplete) {
-		return itemsComplete > 0 ? 'visible' : 'hidden';
-	}
-
-	return dom.element({
-		name: 'button',
-		contents: [s],
-		attributes: {className: 'clear-completed'},
-		style: {
-			visibility: model.oGetItemsCompletedCount(oTodoData).map(visibleAttr)
-		},
-		handlers: {
-			click: onClick
-		}
-	});
-}
-
-function todoFooter(xs, oTodoData) {
-	return dom.element({
-		name: 'footer',
-		attributes: {className: 'footer'},
-		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
-		contents: xs
-	});
-}
-
-module.exports = {
-	clearButton: clearButton,
-	container: container,
-	h1: function(s) { return container([s], 'h1'); },
-	infoFooter: function(xs) { return container(xs, 'footer', 'info'); },
-	link: link,
-	listItem: listItem,
-	mainSection: function(xs) { return container(xs, 'section', 'main'); },
-	newTodoItem: newTodoItem,
-	paragraph: function(xs) { return container(xs, 'p'); },
-	todoFilters: function(xs) { return container(xs.map(prelude.singleton).map(listItem), 'ul', 'filters'); },
-	todoFooter: todoFooter,
-	todoHeader: function(xs) { return container(xs, 'header', 'header'); },
-	todoItemsLeft: todoItemsLeft,
-	todoList: todoList,
-	todoSection: function(xs) { return container(xs, 'section', 'todoapp'); },
-	toggleCheckbox: toggleCheckbox
-};
-
-},{"./model":"/model.js","./prelude":"/prelude.js","./view_todoitem":"/view_todoitem.js","poochie/dom":"poochie/dom","poochie/observable":4}],"/view_todoitem.js":[function(require,module,exports){
+},{"localStorage":1,"poochie/observable":2}],"/todoitem.js":[function(require,module,exports){
 'use strict';
 
 var dom = require('poochie/dom');
@@ -754,7 +594,7 @@ function todoItemImpl(params) {
 
 function todoItem(params) {
 	var e = {attributes: params.attributes, handlers: params.handlers};
-	e.render = function() { return todoItemImpl(e).render(); };
+	e.render = function() { return todoItemImpl(e); };
 	return e;
 }
 
@@ -764,7 +604,172 @@ module.exports = {
 	todoItemImpl: todoItemImpl
 };
 
-},{"./prelude":"/prelude.js","poochie/dom":"poochie/dom","poochie/observable":4}],"poochie/dom":[function(require,module,exports){
+},{"./prelude":"/prelude.js","poochie/dom":"poochie/dom","poochie/observable":2}],"/todolist.js":[function(require,module,exports){
+'use strict';
+
+var observable = require('poochie/observable');
+var gizmos = require('./gizmos');
+var tododata = require('./tododata');
+var todoitem = require('./todoitem');
+
+function todoList(oTodoData, oFragment) {
+	function todoItem(itemData, index) {
+		var handlers = {
+			remove: function() { tododata.removeItem(index, oTodoData); }
+                };
+		return todoitem.todoItem({attributes: itemData, handlers: handlers});
+	}
+
+	function todoItems(todoData, fragment) {
+		if (fragment === '/active') {
+			todoData = todoData.filter(function(x){ return !x.completed.get(); });
+		} else if (fragment === '/completed') {
+			todoData = todoData.filter(function(x){ return x.completed.get(); });
+		}
+		return todoData.map(todoItem);
+	}
+
+	var oIsCompletedFields = tododata.getIsCompletedFields(oTodoData);
+	var oItems = observable.subscriber([oTodoData, oFragment, oIsCompletedFields], todoItems);
+	return gizmos.container(oItems, 'ul', 'todo-list');
+}
+
+module.exports = {
+	todoList: todoList
+};
+
+},{"./gizmos":"/gizmos.js","./tododata":"/tododata.js","./todoitem":"/todoitem.js","poochie/observable":2}],"/todomisc.js":[function(require,module,exports){
+'use strict';
+
+var dom = require('poochie/dom');
+var tododata = require('./tododata');
+var prelude = require('./prelude');
+var gizmos = require('./gizmos');
+
+var ENTER_KEY = 13;
+
+function displayStyle(val) {
+	return val ? 'block' : 'none';
+}
+
+function toggleAllCheckbox(text, oTodoData) {
+	function onClick(evt) {
+		oTodoData.get().forEach(function(item) {
+			item.completed.set(Boolean(evt.target.checked));
+		});
+	}
+
+	return dom.element({
+		name: 'input',
+		attributes: {
+			className: 'toggle-all',
+			type: 'checkbox',
+			checked: tododata.oGetItemsLeftCount(oTodoData).map(prelude.not)
+		},
+		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
+		handlers: {
+			click: onClick
+		}
+	});
+}
+
+function todoItemsLeftContents(itemsLeft) {
+	return [
+		dom.element({name: 'strong', contents: [String(itemsLeft)]}),
+		' item' + (itemsLeft === 1 ? '' : 's') + ' left'
+	];
+}
+
+function oTodoItemsLeftContents(oItems) {
+	return tododata.oGetItemsLeftCount(oItems).map(todoItemsLeftContents);
+}
+
+function todoItemsLeft(oTodoData) {
+	return gizmos.container(oTodoItemsLeftContents(oTodoData), 'span', 'todo-count');
+}
+
+function newTodoItem(placeholderText, oTodoData) {
+	function onKeyUp(evt) {
+		var value = evt.target.value.trim();
+		if (evt.keyCode === ENTER_KEY && value) {
+			tododata.addItem(value, oTodoData);
+			evt.target.value = '';
+		}
+	}
+	return dom.element({
+		name: 'input',
+		attributes: {
+			className: 'new-todo',
+			placeholder: placeholderText,
+			autofocus: true
+		},
+		handlers: {
+			keyup: onKeyUp
+		}
+	});
+}
+
+function clearCompletedButton(s, oTodoData) {
+	function onClick() {
+		// Iterate over the list backward and remove items
+		// by index when completed.
+		var todoData = oTodoData.get();
+		var item;
+		for (var i = todoData.length - 1; i >= 0; i--) {
+			item = todoData[i];
+			if (item.completed.get()) {
+				todoData.splice(i, 1);
+			}
+		}
+		oTodoData.set(todoData);
+	}
+
+	function visibleAttr(itemsComplete) {
+		return itemsComplete > 0 ? 'visible' : 'hidden';
+	}
+
+	return dom.element({
+		name: 'button',
+		contents: [s],
+		attributes: {className: 'clear-completed'},
+		style: {
+			visibility: tododata.oGetItemsCompletedCount(oTodoData).map(visibleAttr)
+		},
+		handlers: {
+			click: onClick
+		}
+	});
+}
+
+function footer(xs, oTodoData) {
+	return dom.element({
+		name: 'footer',
+		attributes: {className: 'footer'},
+		style: {display: oTodoData.map(prelude.len).map(displayStyle)},
+		contents: xs
+	});
+}
+
+function filters(xs) {
+	var contents = xs.map(prelude.singleton).map(gizmos.listItem);
+	return gizmos.container(contents, 'ul', 'filters');
+}
+
+module.exports = {
+	clearCompletedButton: clearCompletedButton,
+	infoFooter: function(xs) { return gizmos.container(xs, 'footer', 'info'); },
+	mainSection: function(xs) { return gizmos.container(xs, 'section', 'main'); },
+	newTodoItem: newTodoItem,
+	filters: filters,
+	footer: footer,
+	header: function(xs) { return gizmos.container(xs, 'header', 'header'); },
+	todoItemsLeft: todoItemsLeft,
+	todoApp: function(xs) { return gizmos.container(xs, 'section', 'todoapp'); },
+	toggleAllCheckbox: toggleAllCheckbox
+};
+
+},{"./gizmos":"/gizmos.js","./prelude":"/prelude.js","./tododata":"/tododata.js","poochie/dom":"poochie/dom"}],"poochie/dom":[function(require,module,exports){
+(function (global){
 //
 // Module name:
 //
@@ -789,7 +794,6 @@ module.exports = {
 
 'use strict';
 
-var document = require('global/document');
 var observable = require('./observable');
 var intervalTimers = [];
 
@@ -830,11 +834,7 @@ function addAttribute(e, subscriber, k, v) {
 function setChildren(subscriber, e, xs) {
     e.innerHTML = '';
     for (var i = 0; i < xs.length; i++) {
-        var x = xs[i];
-        x = typeof x === 'string' ? document.createTextNode(x) : x;
-        if (typeof x.render === 'function') {
-            x = x.render();
-        }
+        var x = render(xs[i]);
         e.appendChild(x);
     }
 }
@@ -844,7 +844,7 @@ function setChildren(subscriber, e, xs) {
 function createElementAndSubscriber(ps) {
 
     // Create DOM node
-    var e = document.createElement(ps.name);
+    var e = global.document.createElement(ps.name);
 
     // Create a subscriber to watch any observables.
     var subscriber = observable.subscriber([], function() { return e; });
@@ -874,7 +874,7 @@ function createElementAndSubscriber(ps) {
     var xs = ps.contents;
     if (xs) {
         if (typeof xs === 'string') {
-            e.appendChild(document.createTextNode(xs));
+            e.appendChild(global.document.createTextNode(xs));
         } else {
             if (xs instanceof observable.Observable) {
                 var xsObs = xs;
@@ -986,9 +986,11 @@ function element(as) {
 // Render a string or object with a render method, such as a ReactiveElement.
 function render(e) {
     if (typeof e === 'string') {
-        return document.createTextNode(e);
+        return global.document.createTextNode(e);
+    } else if (typeof e.render === 'function') {
+        return render(e.render());
     }
-    return e.render();
+    return e;
 }
 
 module.exports = {
@@ -1000,4 +1002,5 @@ module.exports = {
     render: render
 };
 
-},{"./observable":4,"global/document":3}]},{},[]);
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./observable":2}]},{},[]);
