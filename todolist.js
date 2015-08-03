@@ -10,7 +10,12 @@ function todoList(oTodoData, oFragment) {
 		var handlers = {
 			remove: function() { tododata.removeItem(index, oTodoData); }
                 };
-		return todoitem.todoItem({attributes: itemData, handlers: handlers});
+
+		return todoitem.todoItem({
+			text: itemData.text,
+			completed: itemData.completed,
+			handlers: handlers
+		});
 	}
 
 	function todoItems(todoData, fragment) {
